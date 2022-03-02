@@ -2,7 +2,7 @@
 % Please edit documentation in R/Sparse_PanelEstimate.R
 \name{Sparse_PanelEstimate}
 \alias{Sparse_PanelEstimate}
-\title{Estimate DiD estimator for Sparse_PanelMatch object with bootstrapped standard errors}
+\title{Sparse_PanelEstimate}
 \usage{
 Sparse_PanelEstimate(data, n_iterations = 1000, alpha = 0.05)
 }
