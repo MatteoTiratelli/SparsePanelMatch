@@ -41,10 +41,10 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   df1 <- setnames(df1, unit, "unit")
   df1 <- setnames(df1, covs, sapply(1:length(covs), function (x) paste0("control", x)))
 
-  if(typeof(df2$unit) != "double"){stop("Unit variable is not numeric")}
-  if(typeof(df2$treatment) != "double"){stop("Treatment variable is not numeric")}
-  if(typeof(df2$time) != "double"){stop("Time variable is not numeric")}
-  if(typeof(df2$outcome) != "double"){stop("Outcome variable is not numeric")}
+  if(typeof(df1$unit) != "double"){stop("Unit variable is not numeric")}
+  if(typeof(df1$treatment) != "double"){stop("Treatment variable is not numeric")}
+  if(typeof(df1$time) != "double"){stop("Time variable is not numeric")}
+  if(typeof(df1$outcome) != "double"){stop("Outcome variable is not numeric")}
                                     
   # create treatment lags
   df1 <- df1[order(time), sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x)) := shift(treatment, 1:treatment_lags) , unit]
