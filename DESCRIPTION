@@ -4,12 +4,9 @@ Title: Applies Imai, Kim & Wang (2018) "Matching Methods for Causal Inference wi
 Version: 0.1.0
 Author: Matteo Tiratelli
 Maintainer: https://github.com/MatteoTiratelli
-Description: This package allows users to implement Imai, Kim & Wang's PanelMatch package for irregular panel data (e.g. elections). The adapted procedure has four phases:
-    (1) Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date)
-    (2) Within that matched set, find control observations with exactly the same treatment history over the last n period (e.g. over the last 3 election cycles)
-    (3) Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
-    (4) Calculate a Difference-in-Difference estimator across the matched set (with bootstrapped standard errors)
+Description: This package allows users to implement Imai, Kim & Wang's PanelMatch package for irregular panel data (e.g. elections). The adapted procedure has four phases: (1) Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date), (2) Within that matched set, find control observations with exactly the same treatment history over the last n period (e.g. over the last 3 election cycles), (3) Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance, (4) Calculate a Difference-in-Difference estimator across the matched set (with bootstrapped standard errors)
 License: CC BY
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
+Imports: tidyverse, data.table, lubridate, CBPS, MASS, stats, graphics
