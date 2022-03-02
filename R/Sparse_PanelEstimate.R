@@ -13,7 +13,7 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
   output <- data
   
   # Calculate qois
-  data <- setDT(output$summary)
+  data <- data.table::setDT(output$summary)
   data$ideological_change <- (data$outcome - data$lag_outcome)
   Estimate <- tibble(coefs = sum(data$ideological_change*data$weight)/length(unique(data$group)))
   Estimate$lead <- 't+0'
