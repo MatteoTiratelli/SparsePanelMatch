@@ -268,7 +268,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   }
 
   # Generate output
-  output <- list(summary = output,
+  output <- list(summary = as_tibble(output),
                  qoi = qoi,
                  covs = covs,
                  treatment_lags = treatment_lags,
