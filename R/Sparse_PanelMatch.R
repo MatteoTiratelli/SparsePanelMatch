@@ -290,5 +290,5 @@ summary.SparsePanelMatch <- function(data) {
       length(unique(data$summary$group)),', Mean control observations =',
       matches$summary %>% group_by(group) %>% summarise(n = n()) %>% summarise(mean = mean(n)) %>% .[[1,1]] %>% round(., digits = 2),
       ', n =',nrow(data$summary),')\n Quantity of interest =',toupper(data$qoi),'\n\n')
-  print(as_tibble(data$summary) %>% group_by(group))
+  print(data$summary)
 }
