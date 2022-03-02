@@ -28,9 +28,6 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
                               refinement_method = c("none","CBPS.weight", "CBPS.match", "ps.weight", "ps.match", "mahalanobis"),
                               size_match,
                               use_diagonal_covmat = FALSE) {
-  library(tidyverse)
-  library(data.table)
-  library(lubridate)
 
   ## Prepare dataset
   # Rename vars
