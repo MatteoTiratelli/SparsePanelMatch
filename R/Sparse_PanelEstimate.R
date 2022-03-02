@@ -7,8 +7,11 @@
 #' @examples
 #' Sparse_PanelEstimate(data = SparsePanelMatch1, n_iterations = 1000, alpha = 0.05)
 Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
-
+  
+  if(class(data) != "SparsePanelMatch"){stop("Data is not SparsePanelMatch object")}
+  
   output <- data
+  
   # Calculate qois
   data <- setDT(output$summary)
   data$ideological_change <- (data$outcome - data$lag_outcome)
