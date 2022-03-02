@@ -283,13 +283,9 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
 
 
 summary.SparsePanelMatch <- function(data) {
-  matches$summary %>% group_by(group) %>% summarise(n = n()) %>% summarise(mean = mean(n)) %>% .[[1,1]] %>% round(., digits = 2) -> meancontr
-  length(unique(data$summary$group)) -> ngroups
-  nrow(data$summary) -> totaln
   cat(" Matched DiD for Time-Series Cross-Sectional Data (Imai, Kim & Wang 2018)\n Method adapted by matching treated to untreated observations within",data$time_window_in_months,
       "month window\n Exact matching using treatment history over",
       data$treatment_lags,"periods\n Matches refined using",data$refinement_method,
-      "with covariates:",paste(data$covs, collapse = ', '),'\n Matched sets =',ngroups,', Mean control observations =',meancontr,
-      ', n =',totaln,')\n Quantity of interest =',toupper(data$qoi),'\n\n')
+      "with covariates:",paste(data$covs, collapse = ', '),'\n\n')
   data$summary
 }
