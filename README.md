@@ -24,7 +24,7 @@ There are times, however, when observations are irregular by design. For example
 1. Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date).
 2. Within that matched set, find control observations with exactly the same treatment history over the last n observations (e.g. over the last five election cycles).
 
-In the example below, we match observations which (a) occurred within a 6 month time window of the treated observation, and (b) have exactly the same treatment history over the previous 2 observations.
+In the example below, we match observations which (a) occurred within a 5 month time window of the treated observation, and (b) have exactly the same treatment history over the previous 2 observations.
 
 ![Matching Procedure](https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/Matching.png)
 
