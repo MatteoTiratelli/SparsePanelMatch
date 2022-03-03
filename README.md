@@ -1,7 +1,7 @@
 # SparsePanelMatch
 Applies Imai, Kim &amp; Wang (2018) ["Matching Methods for Causal Inference with Time-Series Cross-Sectional Data"](https://imai.fas.harvard.edu/research/tscs.html) to sparse panel data where observations are irregular and there are many missing values.
 
-**Generalised procedure:**
+**Procedure:**
 1. Match each treated observation (unit-time) to untreated observations occurring within a user-defined time window 
 2. Limit that matched set to control observations with exactly the same treatment history over the last n observations
 3. Within that matched set, refine further or weight using Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
@@ -45,7 +45,7 @@ In the example below, we match observations which (a) occurred within a 5 month 
 
 **Refinement:**
 
-3. After this exact matching procedure, the `refinement_method` argument then allows users to further improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distances which can be used to (a) create weights for each control observation (`ps.weight`, `CPBS.weight`), or (b) to limit the size of the set of control observations (`mahalanobis`, `ps.match`, `CBPS.match` - all must be used with `size_match`). For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
+3. After this exact matching procedure, the `refinement_method` argument then allows users to further improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distances. These can be used to (a) create weights for each control observation (`ps.weight`, `CPBS.weight`), or (b) to limit the size of the set of control observations (`mahalanobis`, `ps.match`, `CBPS.match` - all must be used with `size_match`). For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
 
 
 ## Estimation procedure
