@@ -1,5 +1,5 @@
 # SparsePanelMatch
-Applies Imai, Kim &amp; Wang (2018) "Matching Methods for Causal Inference with Time-Series Cross-Sectional Data" to sparse panel data where observations are irregular and there are many missing values.
+Applies Imai, Kim &amp; Wang (2018) ["Matching Methods for Causal Inference with Time-Series Cross-Sectional Data"](https://imai.fas.harvard.edu/research/tscs.html) to sparse panel data where observations are irregular and there are many missing values.
 
 The adapted procedure has four phases: 
 1. Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date)
