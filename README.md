@@ -1,7 +1,7 @@
 # SparsePanelMatch
 Applies Imai, Kim &amp; Wang (2018) ["Matching Methods for Causal Inference with Time-Series Cross-Sectional Data"](https://imai.fas.harvard.edu/research/tscs.html) to sparse panel data where observations are irregular and there are many missing values.
 
-The adapted procedure has four phases: 
+**Generalised procedure:**
 1. Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date)
 2. Within that matched set, find control observations with exactly the same treatment history over the last n period (e.g. over the last 3 election cycles)
 3. Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
@@ -21,14 +21,14 @@ There are times, however, when observations are irregular by design. For example
 ## Matching procedure
 In order to apply Imai, Kim &amp; Wang's (2018) matching methods to data of this sort, this package implements the following procedure:
 
-**Exact matching**
+**Exact matching:**
 
 1. Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date)
 2. Within that matched set, find control observations with exactly the same treatment history over the last n period (e.g. over the last 3 election cycles)
 
-**Refinement**
+**Refinement:**
 
-Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
+Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance. This can improve covariate balancing.
 ``` r
   Sparse_PanelMatch(data = cmp, time = "date", unit = "party", 
   treatment = "wasingov", outcome = "sdper103", 
