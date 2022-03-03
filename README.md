@@ -28,7 +28,7 @@ There are times, however, when observations are irregular by design. For example
   treatment_lags = 3, outcome_leads = 2, 
   time_window_in_months = 60, match_missing = TRUE, 
   covs = c("pervote", "lag_sd_rile"), qoi = "att", 
-  refinement_method = "CBPS.weight", size_match = 5, 
+  refinement_method = "CBPS.match", size_match = 5, 
   use_diagonal_covmat = TRUE)
 ```
 1. This code matches each treated observation (unit-time) with untreated observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date).
@@ -40,7 +40,7 @@ In the example below, we match observations which (a) occurred within a 5 month 
 
 **Refinement:**
 
-3. In addition to this exact matching procedure, the package also allows users to improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distance which can be used to (a) create weights for each control unit, or (b) to limit the size of the set of control observations to those n observations which are most similar to the treated observation (via size_match). For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
+3. After this exact matching procedure, the package then allows users to further improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distances which can be used to (a) create weights for each control observation [ps.weight, CPBS.weight], or (b) to limit the size of the set of control observations (via size_match) [mahalanobis, ps.match, CBPS.match]. For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
 
 ## Estimation procedure
 1. The package then allows users to calculate the Average Treatment effect on Treated/Control via a Difference-in-Difference estimator: within each refined/weighted matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. These can be calculated for n leads of the outcome variable, allowing users to observe the long run impact of the treatment. In that case, for each lead l, we calculate the difference between the outcome at time t+l and the outcome at t-1 for the treated and control observations.
