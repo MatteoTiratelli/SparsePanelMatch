@@ -19,8 +19,9 @@ devtools::install_github("https://github.com/MatteoTiratelli/SparsePanelMatch")
 
 There are times, however, when observations are irregular by design. For example, elections rarely coincide across countries. Data of this sort might look like the graph below, with irregular observations and much missing data.
 <p align="center">
-  <img width="450" src="https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/irregular.png">
+  <img width="550" src="https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/irregular.png">
 </p>
+
 ## Matching procedure
 
 **Example code:**
@@ -40,14 +41,14 @@ matches  <- Sparse_PanelMatch(data = cmp, time = "date", unit = "party",
 
 In the example below, we match observations which (a) occurred within a 5 period window of the treated observation, and (b) have exactly the same treatment history over the previous 2 observations.
 <p align="center">
-  <img width="450" src="https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/matching.png">
+  <img width="550" src="https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/matching.png">
 </p>
 
 **Refinement:**
 
 3. After this exact matching procedure, the `refinement_method` argument then allows users to further improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distances. These can be used to (a) create weights for each control observation (`ps.weight`, `CPBS.weight`), or (b) to limit the size of the set of control observations (`mahalanobis`, `ps.match`, `CBPS.match` - all must be used with `size_match`). For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
 <p align="center">
-  <img width="450" src="https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/Screenshot%202022-03-03%20at%2017.36.10.png">
+  <img width="550" src="https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/Screenshot%202022-03-03%20at%2017.48.41.png">
 </p>
 
 ## Estimation procedure
@@ -63,5 +64,5 @@ plot(estimates, bias_correction = TRUE)
 3. The final estimand is the mean of the Difference-in-Difference scores across all matched sets. A separate estimand is computed for each lead.
 4. Standard errors are then calculated by block bootstrapping (resampling across units), and the package allows users to generate both percentile and bias-corrected confidence intervals.
 <p align="center">
-  <img width="450" src="https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/plot_zoom_png.png">
+  <img width="550" src="https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/plot_zoom_png.png">
 </p>
