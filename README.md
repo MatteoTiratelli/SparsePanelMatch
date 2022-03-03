@@ -39,10 +39,8 @@ Within that matched set, refine further using either Propensity Scores, Covariat
 ## Estimation procedure
 In order to calculate the Average Treatment effect on Treated/Control, we calculate a Difference-in-Difference estimator. Within each matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. These individual Difference-in-Difference scores are then averaged across all of the available matched sets. Standard errors are calculated by block bootstrapping (resampling across units).
 
-```
-sum((Yt - Yt-1) - mean(Y't - Y't-1)) / number_matched_sets
-```
 ``` r
+# sum((Yt - Yt-1) - mean(Y't - Y't-1)) / number_matched_sets
 plot(Sparse_PanelEstimate(data = matches, n_iterations = 1000, alpha = 0.05))
 ```
 
