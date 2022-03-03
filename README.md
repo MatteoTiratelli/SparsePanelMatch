@@ -39,7 +39,7 @@ matches  <- Sparse_PanelMatch(data = cmp, time = "date", unit = "party",
 1. The `time_window_in_months` argument matches each treated observation (unit-time) with untreated observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date).
 2. Within that matched set, the `treatment_lags` argument then selects control observations with exactly the same treatment history over the last n observations (e.g. over the last three election cycles).
 
-In the example below, we match observations which (a) occurred within a 5 month time window of the treated observation, and (b) have exactly the same treatment history over the previous 2 observations.
+In the example below, we match observations which (a) occurred within a 5 period window of the treated observation, and (b) have exactly the same treatment history over the previous 2 observations.
 
 ![Matching Procedure](https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/matching.png)
 
@@ -47,6 +47,7 @@ In the example below, we match observations which (a) occurred within a 5 month 
 
 3. After this exact matching procedure, the `refinement_method` argument then allows users to further improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distances. These can be used to (a) create weights for each control observation (`ps.weight`, `CPBS.weight`), or (b) to limit the size of the set of control observations (`mahalanobis`, `ps.match`, `CBPS.match` - all must be used with `size_match`). For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
 
+![Table of units with CBPS weights](https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/Screenshot%202022-03-03%20at%2017.36.10.png)
 
 ## Estimation procedure
 
