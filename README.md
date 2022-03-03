@@ -19,7 +19,7 @@ devtools::install_github("https://github.com/MatteoTiratelli/SparsePanelMatch")
 
 There are times, however, when observations are irregular by design. For example, elections rarely coincide across countries. Data of this sort might look like the graph below, with irregular observations and much missing data.
 
-![Graph showing irregular panel data](https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/Irregular.png)
+![Graph showing irregular panel data](https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/irregular.png)
 
 
 ## Matching procedure
