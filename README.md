@@ -22,16 +22,6 @@ There are times, however, when observations are irregular by design. For example
 ## Matching procedure
 
 **Exact matching:**
-1. Match each treated observation (unit-time) with untreated observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date).
-2. Within that matched set, limit control observations to those with exactly the same treatment history over the last n observations (e.g. over the last five election cycles).
-
-In the example below, we match observations which (a) occurred within a 5 month time window of the treated observation, and (b) have exactly the same treatment history over the previous 2 observations.
-
-![Matching Procedure](https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/matching.png)
-
-**Refinement:**
-
-Within that matched set, you can then calculate Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distance. These can be used to create weights for each control unit, or to limit the size of the set of control observations (to size_match) to those observations which are most similar to the treated observation. This can improve covariate balancing. For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
 ``` r
   Sparse_PanelMatch(data = cmp, time = "date", unit = "party", 
   treatment = "wasingov", outcome = "sdper103", 
@@ -41,12 +31,27 @@ Within that matched set, you can then calculate Propensity Scores, Covariate Bal
   refinement_method = "CBPS.weight", size_match = 5, 
   use_diagonal_covmat = TRUE)
 ```
+1. This code matches each treated observation (unit-time) with untreated observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date).
+2. Within that matched set, it then selects control observations with exactly the same treatment history over the last n observations (e.g. over the last three election cycles).
+
+In the example below, we match observations which (a) occurred within a 5 month time window of the treated observation, and (b) have exactly the same treatment history over the previous 2 observations.
+
+![Matching Procedure](https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/matching.png)
+
+**Refinement:**
+
+3. In addition to this exact matching procedure, the package also allows users to improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distance which can be used to (a) create weights for each control unit, or (b) to limit the size of the set of control observations to those n observations which are most similar to the treated observation (via size_match). For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
+
 ## Estimation procedure
-In order to calculate the Average Treatment effect on Treated/Control, we calculate a Difference-in-Difference estimator. Within each matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. These individual Difference-in-Difference scores are then averaged across all of the available matched sets. Standard errors are calculated by block bootstrapping (resampling across units).
+1. The package then allows users to calculate the Average Treatment effect on Treated/Control via a Difference-in-Difference estimator: within each refined/weighted matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. These can be calculated for n leads of the outcome variable, allowing users to observe the long run impact of the treatment. In that case, for each lead l, we calculate the difference between the outcome at time t+l and the outcome at t-1 for the treated and control observations.
+2. The final estimand is the mean of the Difference-in-Difference scores for each matched set.
+3. Standard errors are calculated by block bootstrapping (resampling across units), and the package allows users to generate percentile and bias-corrected confidence intervals.
 
 ``` r
 # DiD = sum((Yt - Yt-1) - mean(Y't - Y't-1)) / number_matched_sets
-plot(Sparse_PanelEstimate(data = matches, n_iterations = 1000, alpha = 0.05))
+# Where Yt is the outcome variable for the treated observation at time t, and Y't is the outcome variable for a control observation at time t
+estimates <- Sparse_PanelEstimate(data = matches, n_iterations = 1000, alpha = 0.05)
+plot(estimates, bias_correction = TRUE)
 ```
 
 ![Plot of effects over time](https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/plot_zoom_png.png)
