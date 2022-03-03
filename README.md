@@ -57,9 +57,9 @@ plot(estimates, bias_correction = TRUE)
 
 ```
 
-1. The package then allows users to calculate the Average Treatment effect on Treated/Control via a Difference-in-Difference estimator: within each refined/weighted matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. In pseudo-code: `DiD = (Yt - Yt-1) - mean(Y't - Y't-1)`. Where `Yt` is the outcome variable for the treated observation at time `t`, and `Y't` is the outcome variable for a control observation at time `t`.
+1. The package then allows users to calculate the Average Treatment effect on Treated/Control via a Difference-in-Difference estimator: within each matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. In pseudo-code: `DiD = (Yt - Yt-1) - mean(Y't - Y't-1)`, where `Yt` is the outcome variable for the treated observation at time `t`, and `Y't` is the outcome variable for a control observation at time `t`.
 2. These can be calculated for n leads of the outcome variable (specified via `outcome_leads`), allowing users to observe the long run impact of the treatment. In that case, for each lead `L`, we calculate the difference between the outcome at time `t+L` and the outcome at `t-1` for all treated and control observations.
 3. The final estimand is the mean of the Difference-in-Difference scores across all matched sets. A separate estimand is computed for each lead.
-4. Standard errors are calculated by block bootstrapping (resampling across units), and the package allows users to generate percentile and bias-corrected confidence intervals.
+4. Standard errors are then calculated by block bootstrapping (resampling across units), and the package allows users to generate both percentile and bias-corrected confidence intervals.
 
 ![Plot of effects over time](https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/plot_zoom_png.png)
