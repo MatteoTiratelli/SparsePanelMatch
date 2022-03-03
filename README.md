@@ -2,10 +2,10 @@
 Applies Imai, Kim &amp; Wang (2018) ["Matching Methods for Causal Inference with Time-Series Cross-Sectional Data"](https://imai.fas.harvard.edu/research/tscs.html) to sparse panel data where observations are irregular and there are many missing values.
 
 **Generalised procedure:**
-1. Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date)
-2. Within that matched set, find control observations with exactly the same treatment history over the last n period (e.g. over the last 3 election cycles)
-3. Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
-4. Calculate a Difference-in-Difference estimator across the matched set (with bootstrapped standard errors)
+1. Match each treated observation (unit-time) to untreated observations occurring within a user-defined time window 
+2. Limit that matched set to control observations with exactly the same treatment history over the last n observations
+3. Within that matched set, refine further or weight using Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
+4. Calculate a Difference-in-Difference estimator across the matched sets (with bootstrapped standard errors)
 
 **Installation:**
 ``` r
