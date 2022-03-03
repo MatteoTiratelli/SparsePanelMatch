@@ -7,6 +7,7 @@ The adapted procedure has four phases:
 3. Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
 4. Calculate a Difference-in-Difference estimator across the matched set (with bootstrapped standard errors)
 
+**Installation:**
 ``` r
 devtools::install_github("https://github.com/MatteoTiratelli/SparsePanelMatch")
 ```
@@ -29,13 +30,19 @@ In order to apply Imai, Kim &amp; Wang's (2018) matching methods to data of this
 
 Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
 ``` r
-  Sparse_PanelMatch(data = cmp, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 2, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "CBPS.weight", size_match = 5, use_diagonal_covmat = TRUE)
+  Sparse_PanelMatch(data = cmp, time = "date", unit = "party", 
+  treatment = "wasingov", outcome = "sdper103", 
+  treatment_lags = 3, outcome_leads = 2, 
+  time_window_in_months = 60, match_missing = TRUE, 
+  covs = c("pervote", "lag_sd_rile"), qoi = "att", 
+  refinement_method = "CBPS.weight", size_match = 5, 
+  use_diagonal_covmat = TRUE)
 ```
 ## Estimation procedure
 In order to calculate the Average Treatment effect on Treated/Control, we calculate a Difference-in-Difference estimator. Within each matched set, we compare the difference in the treated unit with the mean difference in control units. These individual Difference-in-Difference scores are then averaged across all of the available matched sets. Standard errors are calculated by block bootstrapping (resampling across units).
 
 ``` r
-Sparse_PanelEstimate(data = matches, n_iterations = 1000, alpha = 0.05)
+plot(Sparse_PanelEstimate(data = matches, n_iterations = 1000, alpha = 0.05))
 ```
 
 ![Plot of effects over time](https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/plot_zoom_png.png)
