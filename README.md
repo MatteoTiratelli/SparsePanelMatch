@@ -19,10 +19,8 @@ There are times, however, when observations are irregular by design. For example
 ![Graph showing irregular panel data](https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/Irregular.png)
 
 ## Matching procedure
-In order to apply Imai, Kim &amp; Wang's (2018) matching methods to data of this sort, this package implements the following procedure:
 
 **Exact matching:**
-
 1. Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date)
 2. Within that matched set, find control observations with exactly the same treatment history over the last n period (e.g. over the last 3 election cycles)
 
@@ -39,7 +37,7 @@ Within that matched set, refine further using either Propensity Scores, Covariat
   use_diagonal_covmat = TRUE)
 ```
 ## Estimation procedure
-In order to calculate the Average Treatment effect on Treated/Control, we calculate a Difference-in-Difference estimator. Within each matched set, we compare the difference in the treated unit with the mean difference in control units. These individual Difference-in-Difference scores are then averaged across all of the available matched sets. Standard errors are calculated by block bootstrapping (resampling across units).
+In order to calculate the Average Treatment effect on Treated/Control, we calculate a Difference-in-Difference estimator. Within each matched set, we compare the difference in the treated unit (Yt - Yt-1) with the (weighted) mean difference in control units (mean(Y't - Y't-1). These individual Difference-in-Difference scores are then averaged across all of the available matched sets (sum(DiDs)/number_matched_sets). Standard errors are calculated by block bootstrapping (resampling across units).
 
 ``` r
 plot(Sparse_PanelEstimate(data = matches, n_iterations = 1000, alpha = 0.05))
