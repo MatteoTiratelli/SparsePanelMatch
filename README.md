@@ -14,7 +14,8 @@ devtools::install_github("https://github.com/MatteoTiratelli/SparsePanelMatch")
 
 ## Motivating example
 [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html) have developed a matching procedure to facilitate causal inference with time-series cross-sectional data. Although their approach is more general, their software package ([PanelMatch](https://github.com/insongkim/PanelMatch)) only works with regular panel data where there are repeated observations of each unit at identical and equally spaced moments in time. A canonical example might be repeated observations of countries each year.
-There are times, however, when observations are irregular by design. For example, elections across countries rarely coincide, particularly when we look at more granular measures of time. Data of this sort might look like the graph below, with irregular observations and much missing data.
+
+There are times, however, when observations are irregular by design. For example, elections rarely coincide across countries. Data of this sort might look like the graph below, with irregular observations and much missing data.
 
 ![Graph showing irregular panel data](https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/Irregular.png)
 
@@ -30,7 +31,7 @@ In the example below, we match observations which (a) occurred within a 5 month 
 
 **Refinement:**
 
-Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance. This can improve covariate balancing.
+Within that matched set, you can then calculate Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distance. These can be used to create weights for each control unit, or to limit the size of the set of control observations (to size_match) to those observations which are most similar to the treated observation. This can improve covariate balancing. For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
 ``` r
   Sparse_PanelMatch(data = cmp, time = "date", unit = "party", 
   treatment = "wasingov", outcome = "sdper103", 
@@ -44,7 +45,7 @@ Within that matched set, refine further using either Propensity Scores, Covariat
 In order to calculate the Average Treatment effect on Treated/Control, we calculate a Difference-in-Difference estimator. Within each matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. These individual Difference-in-Difference scores are then averaged across all of the available matched sets. Standard errors are calculated by block bootstrapping (resampling across units).
 
 ``` r
-# sum((Yt - Yt-1) - mean(Y't - Y't-1)) / number_matched_sets
+# DiD = sum((Yt - Yt-1) - mean(Y't - Y't-1)) / number_matched_sets
 plot(Sparse_PanelEstimate(data = matches, n_iterations = 1000, alpha = 0.05))
 ```
 
