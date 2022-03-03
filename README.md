@@ -41,6 +41,7 @@ In the example below, we match observations which (a) occurred within a 5 month 
 ![Matching Procedure](https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/matching.png)
 
 **Refinement:**
+
 3. After this exact matching procedure, the `refinement_method` argument then allows users to further improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distances which can be used to (a) create weights for each control observation (`ps.weight`, `CPBS.weight`), or (b) to limit the size of the set of control observations (`mahalanobis`, `ps.match`, `CBPS.match` - all must be used with `size_match`). For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
 
 ## Estimation procedure
