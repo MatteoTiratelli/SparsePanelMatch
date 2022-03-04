@@ -84,7 +84,7 @@ plot.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
   ylim <- c(min(min(plotdata$bootstrap_low),min(plotdata$bootstrap_low_BC)), max(max(plotdata$bootstrap_high),max(plotdata$bootstrap_high_BC)))
   if (bias_correction == FALSE){
     graphics::plot(x = 1:(nrow(plotdata)),y = plotdata$coefs, frame = TRUE, pch = 16, cex = 1.5,
-                   xaxt = "n", ylab = paste0("Estimated ",toupper(plotdata$qoi)), xlab = "Time", ylim = ylim,
+                   xaxt = "n", ylab = paste0("Estimated ",toupper(object$qoi)), xlab = "Time", ylim = ylim,
                    main = "Estimated Effects of Treatment Over Time")
     graphics::axis(side = 1, at = 1:nrow(plotdata), labels = plotdata$lead)
     graphics::segments(1:(nrow(plotdata)), plotdata$bootstrap_low, 1:(nrow(plotdata)), plotdata$bootstrap_high)
@@ -92,7 +92,7 @@ plot.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
   }
   if (bias_correction == TRUE){
     graphics::plot(x = 1:(nrow(plotdata)),y = plotdata$coefs, frame = TRUE, pch = 16, cex = 1.5,
-                   xaxt = "n", ylab = paste0("Estimated ",toupper(plotdata$qoi), " (bias corrected)"), xlab = "Time", ylim = ylim,
+                   xaxt = "n", ylab = paste0("Estimated ",toupper(object$qoi), " (bias corrected)"), xlab = "Time", ylim = ylim,
                    main = "Estimated Effects of Treatment Over Time")
     graphics::axis(side = 1, at = 1:nrow(plotdata), labels = plotdata$lead)
     graphics::segments(1:(nrow(plotdata)), plotdata$bootstrap_low_BC, 1:(nrow(plotdata)), plotdata$bootstrap_high_BC)
