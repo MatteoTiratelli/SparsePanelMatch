@@ -1,24 +1,25 @@
 #' Find matching units across irregular panel data:
-#' Stage 1: Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date)
-#' Stage 2: Within that matched set, find control observations with exactly the same treatment history over the last n period (e.g. over the last 3 election cycles)
-#' Stage 3: Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
-#'
-#' @param data The dataset
-#' @param time The name of the time variable, quoted as a string, in YYYYMM format and structured as numeric variable.
-#' @param unit The name of the unit variable, quoted as a string, structured as a numeric variable.
-#' @param treatment The name of the treatment variable, quoted as a string, should be numeric variable where 0 = untreated and 1 = treated.
-#' @param treatment_lags The number of treatment lags to use for the exact matching on treatment history.
-#' @param outcome_leads The number of outcome leads for which to calculate DiD estimators (each compared to Yt-1) [single integer].
-#' @param time_window_in_months The size of the time window to search for control observations within [single integer].
+#' 1. Match each treated observation (unit-time) to untreated observations occurring within a user-defined time window 
+#' 2. Limit that matched set to control observations with exactly the same treatment history over the last n observations
+#' 3. Within that matched set, refine further or weight using Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
+#' 
+#' @param data The name of the dataset
+#' @param time String of characters representing the name of the time variable. Should be in YYYYMM (e.g. 199204) format and structured as numeric variable.
+#' @param unit String of characters representing the name of the unit variable. Should be a numeric variable.
+#' @param treatment String of characters representing the name of the treatment variable. Should be numeric variable where 0 = untreated and 1 = treated.
+#' @param outcome String of characters representing the name of the outcome variable. Should be a numeric variable.
+#' @param treatment_lags Integer representing the number of treatment lags to use for the exact matching on treatment history.
+#' @param outcome_leads Integer representing the number of outcome leads for which to calculate DiD estimands (each compared to Yt-1).
+#' @param time_window_in_months Integer representing the size of the time window in months within which to search for control observations.
 #' @param match_missing Whether or not to match missing values within treatment history (defaults to TRUE).
-#' @param covs List of covariates to use in matching refinement procedures (should be a list of variables quoted as strings).
-#' @param qoi Quantity of interest (either ATT [Average Treatment effect on Treated] or ATC [Average Treatment effect on Controls]).
-#' @param refinement_method Refinement method to use at Stage 3. Can take one of "none","CBPS.weight" (adjusts weights by Covariate Balancing Propensity Scores), "CBPS.match" (reduces the size of each control set to size_match by lowest CBPS), "ps.weight" and "ps.match" do the same for standard propensity scores, "mahalanobis" reduces set size to size_match by Mahalanobis distance. For more details see Imai, Kim & Wang (2018).
-#' @param size_match Maximum size of sets. For use with 'CBPS.match', 'ps.match' and 'mahalanobis'.
-#' @paramuse_diagonal_covmat When calculating Mahalanobis distance, should you use a diagonal matrix with only covariate variances, or a regular covariance matrix. Defaults to FALSE. In many cases, setting this to TRUE can lead to better covariate balance, especially when there is high correlation between variables.
+#' @param covs List of covariates to use in matching refinement procedures (should be a list of strings of characters).
+#' @param qoi The wuantity of interest: either 'ATT' (Average Treatment effect on Treated) or 'ATC' (Average Treatment effect on Controls).
+#' @param refinement_method The refinement method used to improve covariate balancing after the exact matching procedure. Can take one of: "none"; "CBPS.weight" (adjusts weights by Covariate Balancing Propensity Scores); "CBPS.match" (reduces the size of each control set to size_match by lowest CBPS); "ps.weight" and "ps.match" do the same for standard propensity scores; "mahalanobis" reduces set size to size_match by Mahalanobis distance. For more details see Imai, Kim & Wang (2018).
+#' @param size_match Integer representing the maximum number of control observations within each refined set. For use with 'CBPS.match', 'ps.match' and 'mahalanobis'. Has no impact otherwise.
+#' @param use_diagonal_covmat Whether or not mahalanobis distance calculation should use a regular covariance matrix (FALSE), or a diagonal matrix with only covariate variances (TRUE). Imai, Kim & Wang (2018) report that, "in many cases, setting this to TRUE can lead to better covariate balance, especially when there is high correlation between variables". Default is FALSE.
 #' @return A Sparse_PanelMatch object
 #' @examples
-#' Sparse_PanelMatch(data = cmp, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
+#' MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
 
 
 Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
@@ -250,7 +251,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     }
 
     # Restrict size of each matched set to size_match
-    restrict_sets <- function(set, size.match = size_match) {
+    restrict_sets_maha <- function(set, size.match = size_match) {
       treated_maha <- set[set$treatment == 1,]
       control_maha <- set[set$treatment == 0,]
       control_maha <- arrange(control_maha, maha)[1:size.match,]
@@ -261,7 +262,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     }
 
     for (i in 1:length(listofdfs)) {
-      sets[[listofdfs[[i]]]] <- restrict_sets(sets[[listofdfs[[i]]]])
+      sets[[listofdfs[[i]]]] <- restrict_sets_maha(sets[[listofdfs[[i]]]])
     }
 
     output <- bind_rows(sets)
@@ -282,10 +283,10 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
 }
 
 
-summary.SparsePanelMatch <- function(data) {
-  cat(" Matched DiD for Time-Series Cross-Sectional Data (Imai, Kim & Wang 2018)\n Method adapted by matching treated to untreated observations within",data$time_window_in_months,
+summary.SparsePanelMatch <- function(object) {
+  cat(" Matched DiD for Time-Series Cross-Sectional Data (Imai, Kim & Wang 2018)\n Method adapted by matching treated to untreated observations within",object$time_window_in_months,
       "month window\n Exact matching using treatment history over",
-      data$treatment_lags,"periods\n Matches refined using",data$refinement_method,
-      "with covariates:",paste(data$covs, collapse = ', '),'\n\n')
-  data$summary
+      object$treatment_lags,"periods\n Matches refined using",object$refinement_method,
+      "with covariates:",paste(object$covs, collapse = ', '),'\n\n')
+  object$summary
 }

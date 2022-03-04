@@ -2,7 +2,10 @@
 % Please edit documentation in R/Sparse_PanelMatch.R
 \name{Sparse_PanelMatch}
 \alias{Sparse_PanelMatch}
-\title{Sparse_PanelMatch}
+\title{Find matching units across irregular panel data:
+1. Match each treated observation (unit-time) to untreated observations occurring within a user-defined time window 
+2. Limit that matched set to control observations with exactly the same treatment history over the last n observations
+3. Within that matched set, refine further or weight using Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance}
 \usage{
 Sparse_PanelMatch(
   data,
@@ -23,39 +26,43 @@ Sparse_PanelMatch(
 )
 }
 \arguments{
-\item{data}{The dataset}
+\item{data}{The name of the dataset}
 
-\item{time}{The name of the time variable, quoted as a string, in YYYYMM format and structured as numeric variable.}
+\item{time}{String of characters representing the name of the time variable. Should be in YYYYMM (e.g. 199204) format and structured as numeric variable.}
 
-\item{unit}{The name of the unit variable, quoted as a string, structured as a numeric variable.}
+\item{unit}{String of characters representing the name of the unit variable. Should be a numeric variable.}
 
-\item{treatment}{The name of the treatment variable, quoted as a string, should be numeric variable where 0 = untreated and 1 = treated.}
+\item{treatment}{String of characters representing the name of the treatment variable. Should be numeric variable where 0 = untreated and 1 = treated.}
 
-\item{treatment_lags}{The number of treatment lags to use for the exact matching on treatment history.}
+\item{outcome}{String of characters representing the name of the outcome variable. Should be a numeric variable.}
 
-\item{outcome_leads}{The number of outcome leads for which to calculate DiD estimators (each compared to Yt-1) [single integer].}
+\item{treatment_lags}{Integer representing the number of treatment lags to use for the exact matching on treatment history.}
 
-\item{time_window_in_months}{The size of the time window to search for control observations within [single integer].}
+\item{outcome_leads}{Integer representing the number of outcome leads for which to calculate DiD estimands (each compared to Yt-1).}
+
+\item{time_window_in_months}{Integer representing the size of the time window in months within which to search for control observations.}
 
 \item{match_missing}{Whether or not to match missing values within treatment history (defaults to TRUE).}
 
-\item{covs}{List of covariates to use in matching refinement procedures (should be a list of variables quoted as strings).}
+\item{covs}{List of covariates to use in matching refinement procedures (should be a list of strings of characters).}
 
-\item{qoi}{Quantity of interest (either ATT [Average Treatment effect on Treated] or ATC [Average Treatment effect on Controls]).}
+\item{qoi}{The wuantity of interest: either 'ATT' (Average Treatment effect on Treated) or 'ATC' (Average Treatment effect on Controls).}
 
-\item{refinement_method}{Refinement method to use at Stage 3. Can take one of "none","CBPS.weight" (adjusts weights by Covariate Balancing Propensity Scores), "CBPS.match" (reduces the size of each control set to size_match by lowest CBPS), "ps.weight" and "ps.match" do the same for standard propensity scores, "mahalanobis" reduces set size to size_match by Mahalanobis distance. For more details see Imai, Kim & Wang (2018).}
+\item{refinement_method}{The refinement method used to improve covariate balancing after the exact matching procedure. Can take one of: "none"; "CBPS.weight" (adjusts weights by Covariate Balancing Propensity Scores); "CBPS.match" (reduces the size of each control set to size_match by lowest CBPS); "ps.weight" and "ps.match" do the same for standard propensity scores; "mahalanobis" reduces set size to size_match by Mahalanobis distance. For more details see Imai, Kim & Wang (2018).}
 
-\item{size_match}{Maximum size of sets. For use with 'CBPS.match', 'ps.match' and 'mahalanobis'.}
+\item{size_match}{Integer representing the maximum number of control observations within each refined set. For use with 'CBPS.match', 'ps.match' and 'mahalanobis'. Has no impact otherwise.}
+
+\item{use_diagonal_covmat}{Whether or not mahalanobis distance calculation should use a regular covariance matrix (FALSE), or a diagonal matrix with only covariate variances (TRUE). Imai, Kim & Wang (2018) report that, "in many cases, setting this to TRUE can lead to better covariate balance, especially when there is high correlation between variables". Default is FALSE.}
 }
 \value{
 A Sparse_PanelMatch object
 }
 \description{
-Find matching units across irregular panel data:\cr\cr
-Stage 1: Match each treated observation (unit-time) with control observations occurring within a user-defined time window (this is the only significant difference to the original method, where it is assumed that the panel data is well-ordered and regular, meaning that each observation is matched with every other observation at that year/month/date)\cr\cr
-Stage 2: Within that matched set, find control observations with exactly the same treatment history over the last n observations (e.g. over the last 3 election cycles)\cr\cr
-Stage 3: Within that matched set, refine further using either Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
+Find matching units across irregular panel data:
+1. Match each treated observation (unit-time) to untreated observations occurring within a user-defined time window 
+2. Limit that matched set to control observations with exactly the same treatment history over the last n observations
+3. Within that matched set, refine further or weight using Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
 }
 \examples{
-Sparse_PanelMatch(data = cmp, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
+MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
 }

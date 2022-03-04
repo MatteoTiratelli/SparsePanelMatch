@@ -2,7 +2,7 @@
 % Please edit documentation in R/Sparse_PanelEstimate.R
 \name{Sparse_PanelEstimate}
 \alias{Sparse_PanelEstimate}
-\title{Sparse_PanelEstimate}
+\title{Estimate DiD estimator for Sparse_PanelMatch object with bootstrapped standard errors}
 \usage{
 Sparse_PanelEstimate(data, n_iterations = 1000, alpha = 0.05)
 }
@@ -20,5 +20,6 @@ A SparsePanelEstimate object
 Estimate DiD estimator for Sparse_PanelMatch object with bootstrapped standard errors
 }
 \examples{
-Sparse_PanelEstimate(data = SparsePanelMatch1, n_iterations = 1000, alpha = 0.05)
+MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
+Sparse_PanelEstimate(data = MatchedData, n_iterations = 1000, alpha = 0.05)
 }

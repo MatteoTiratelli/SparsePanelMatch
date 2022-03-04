@@ -2,12 +2,12 @@
 % Please edit documentation in R/Sparse_PanelEstimate.R
 \name{summary.SparsePanelEstimate}
 \alias{summary.SparsePanelEstimate}
-\title{summary.SparsePanelEstimate}
+\title{Summarises a SparsePanelEstimate object}
 \usage{
-\method{summary}{SparsePanelEstimate}(data, bias_correction = FALSE)
+\method{summary}{SparsePanelEstimate}(object, bias_correction = FALSE)
 }
 \arguments{
-\item{data}{A SparsePanelEstimate object}
+\item{object}{A SparsePanelEstimate object}
 
 \item{bias_correction}{Whether to display bias corrected confidence intervals (Efron & Tibshirani 1993 p138), or standard percentile confidence intervals, Defaults to FALSE (standard percentiles).}
 }
@@ -15,5 +15,7 @@
 Summarises a SparsePanelEstimate object
 }
 \examples{
-summary(SparsePanelEstimate1)
+MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
+Estimate <- Sparse_PanelEstimate(data = MatchedData, n_iterations = 1000, alpha = 0.05)
+summary(Estimate, bias_correction = TRUE)
 }

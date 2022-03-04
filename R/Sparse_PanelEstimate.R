@@ -5,7 +5,8 @@
 #' @param alpha The alpha level to use when calculating the confidence intervals (defaults to 0.05)
 #' @return A SparsePanelEstimate object
 #' @examples
-#' Sparse_PanelEstimate(data = SparsePanelMatch1, n_iterations = 1000, alpha = 0.05)
+#' MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
+#' Sparse_PanelEstimate(data = MatchedData, n_iterations = 1000, alpha = 0.05)
 Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
   
   if(class(data) != "SparsePanelMatch"){stop("Data is not SparsePanelMatch object")}
@@ -65,19 +66,21 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
 
 #' Summarises a SparsePanelEstimate object
 #'
-#' @param data A SparsePanelEstimate object
+#' @param object A SparsePanelEstimate object
 #' @param bias_correction Whether to display bias corrected confidence intervals (Efron & Tibshirani 1993 p138), or standard percentile confidence intervals, Defaults to FALSE (standard percentiles).
 #' @examples
-#' summary(SparsePanelEstimate1)
-summary.SparsePanelEstimate <- function(data, bias_correction = FALSE) {
-  cat(" Matched DiD estimate of",toupper(data$qoi),'with refinement by',data$refinement_method,'\n With bootstrapped standard errors (using',data$n_iterations,"iterations, alpha =",data$alpha,")\n Bias corrected confidence intervals available using the bias_correction argument\n\n")
-  if(bias_correction == FALSE){print(data$summary %>% select(lead, coefs, bootstrap_sd, bootstrap_low, bootstrap_high))}
-  if(bias_correction == TRUE){print(data$summary %>% select(lead, coefs, bootstrap_sd, bootstrap_low_BC, bootstrap_high_BC))}
+#' MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
+#' Estimate <- Sparse_PanelEstimate(data = MatchedData, n_iterations = 1000, alpha = 0.05)
+#' summary(Estimate, bias_correction = TRUE)
+summary.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
+  cat(" Matched DiD estimate of",toupper(object$qoi),'with refinement by',object$refinement_method,'\n With bootstrapped standard errors (using',object$n_iterations,"iterations, alpha =",object$alpha,")\n Bias corrected confidence intervals available using the bias_correction argument\n\n")
+  if(bias_correction == FALSE){print(object$summary %>% select(lead, coefs, bootstrap_sd, bootstrap_low, bootstrap_high))}
+  if(bias_correction == TRUE){print(object$summary %>% select(lead, coefs, bootstrap_sd, bootstrap_low_BC, bootstrap_high_BC))}
 }
 
 
-plot.SparsePanelEstimate <- function(data, bias_correction = FALSE) {
-  plot.data <- data$summary
+plot.SparsePanelEstimate <- function(x, bias_correction = FALSE) {
+  plot.data <- x$summary
   ylim <- c(min(min(plot.data$bootstrap_low),min(plot.data$bootstrap_low_BC)), max(max(plot.data$bootstrap_high),max(plot.data$bootstrap_high_BC)))
   if (bias_correction == FALSE){
     graphics::plot(x = 1:(nrow(plot.data)),y = plot.data$coefs, frame = TRUE, pch = 16, cex = 1.5,

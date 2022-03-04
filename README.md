@@ -26,7 +26,7 @@ There are times, however, when observations are irregular by design. For example
 
 **Example code:**
 ``` r
-matches  <- Sparse_PanelMatch(data = cmp, time = "date", unit = "party", 
+matches  <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", 
                   treatment = "wasingov", outcome = "sdper103", 
                   treatment_lags = 3, outcome_leads = 2, 
                   time_window_in_months = 60, match_missing = TRUE, 
