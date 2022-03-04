@@ -47,9 +47,6 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   # create outcome lag
   df1 <- df1[order(time), "lag_outcome" := shift(outcome, 1) , unit]
    
-  # remove na                                  
-  df1 %>% select(unit, time, treatment, outcome, lag_outcome, starts_with('control')) -> df1
-  df1 <- na.omit(df1) # Please note this!
                                     
   # create treatment lags
   df1 <- df1[order(time), sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x)) := shift(treatment, 1:treatment_lags) , unit]
