@@ -3,7 +3,7 @@
 \docType{data}
 \name{CMP}
 \alias{CMP}
-\title{Subset of Comparative Manifesto Project database, with additional variables indicating whether or not each party has been in government (data from Parl Gov database and Party Facts)}
+\title{CMP dataset}
 \format{
 A dataframe with 473 rows and 9 variables:
 \describe{
