@@ -16,7 +16,7 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
   # Calculate qois
   df1 <- data.table::setDT(output$summary)
   df1$ideological_change <- (df1$outcome - df1$lag_outcome)
-  Estimate <- tibble(coefs = sum(df1$ideological_change*df1$weight)/length(unique(df1$group)))
+  Estimate <- tibble(coefs = sum(df1$ideological_change*df1$weight, na.rm = TRUE)/length(unique(df1$group)))
   Estimate$lead <- 't+0'
 
   if (output$outcome_leads > 0){
@@ -80,22 +80,22 @@ summary.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
 
 
 plot.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
-  plot.data <- object$summary
-  ylim <- c(min(min(plot.data$bootstrap_low),min(plot.data$bootstrap_low_BC)), max(max(plot.data$bootstrap_high),max(plot.data$bootstrap_high_BC)))
+  plotdata <- object$summary
+  ylim <- c(min(min(plotdata$bootstrap_low),min(plotdata$bootstrap_low_BC)), max(max(plotdata$bootstrap_high),max(plotdata$bootstrap_high_BC)))
   if (bias_correction == FALSE){
-    graphics::plot(x = 1:(nrow(plot.data)),y = plot.data$coefs, frame = TRUE, pch = 16, cex = 1.5,
-                   xaxt = "n", ylab = paste0("Estimated ",toupper(data$qoi)), xlab = "Time", ylim = ylim,
+    graphics::plot(x = 1:(nrow(plotdata)),y = plotdata$coefs, frame = TRUE, pch = 16, cex = 1.5,
+                   xaxt = "n", ylab = paste0("Estimated ",toupper(plotdata$qoi)), xlab = "Time", ylim = ylim,
                    main = "Estimated Effects of Treatment Over Time")
-    graphics::axis(side = 1, at = 1:nrow(plot.data), labels = plot.data$lead)
-    graphics::segments(1:(nrow(plot.data)), plot.data$bootstrap_low, 1:(nrow(plot.data)), plot.data$bootstrap_high)
+    graphics::axis(side = 1, at = 1:nrow(plotdata), labels = plotdata$lead)
+    graphics::segments(1:(nrow(plotdata)), plotdata$bootstrap_low, 1:(nrow(plotdata)), plotdata$bootstrap_high)
     graphics::abline(h = 0, lty = "dashed")
   }
   if (bias_correction == TRUE){
-    graphics::plot(x = 1:(nrow(plot.data)),y = plot.data$coefs, frame = TRUE, pch = 16, cex = 1.5,
-                   xaxt = "n", ylab = paste0("Estimated ",toupper(data$qoi), " (bias corrected)"), xlab = "Time", ylim = ylim,
+    graphics::plot(x = 1:(nrow(plotdata)),y = plotdata$coefs, frame = TRUE, pch = 16, cex = 1.5,
+                   xaxt = "n", ylab = paste0("Estimated ",toupper(plotdata$qoi), " (bias corrected)"), xlab = "Time", ylim = ylim,
                    main = "Estimated Effects of Treatment Over Time")
-    graphics::axis(side = 1, at = 1:nrow(plot.data), labels = plot.data$lead)
-    graphics::segments(1:(nrow(plot.data)), plot.data$bootstrap_low_BC, 1:(nrow(plot.data)), plot.data$bootstrap_high_BC)
+    graphics::axis(side = 1, at = 1:nrow(plotdata), labels = plotdata$lead)
+    graphics::segments(1:(nrow(plotdata)), plotdata$bootstrap_low_BC, 1:(nrow(plotdata)), plotdata$bootstrap_high_BC)
     graphics::abline(h = 0, lty = "dashed")
   }
 }
