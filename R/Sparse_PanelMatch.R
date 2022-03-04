@@ -48,7 +48,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   df1 <- df1[order(time), "lag_outcome" := shift(outcome, 1) , unit]
    
   # remove na                                  
-  df1 %>% select(unit, time, treatment, outcome, lag_outcome, starts_with(control)) -> df1
+  df1 %>% select(unit, time, treatment, outcome, lag_outcome, starts_with('control')) -> df1
   df1 <- na.omit(df1) # Please note this!
                                     
   # create treatment lags
