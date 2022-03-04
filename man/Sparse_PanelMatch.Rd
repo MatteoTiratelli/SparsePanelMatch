@@ -2,10 +2,7 @@
 % Please edit documentation in R/Sparse_PanelMatch.R
 \name{Sparse_PanelMatch}
 \alias{Sparse_PanelMatch}
-\title{Find matching units across irregular panel data:
-1. Match each treated observation (unit-time) to untreated observations occurring within a user-defined time window 
-2. Limit that matched set to control observations with exactly the same treatment history over the last n observations
-3. Within that matched set, refine further or weight using Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance}
+\title{Sparse_PanelMatch}
 \usage{
 Sparse_PanelMatch(
   data,
