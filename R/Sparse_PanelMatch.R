@@ -39,14 +39,14 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   df1 <- setnames(df1, unit, "unit")
   df1 <- setnames(df1, covs, sapply(1:length(covs), function (x) paste0("control", x)))                                   
                                     
-  if(typeof(df1$unit) != "double"){stop("Unit variable is not numeric")}
-  if(typeof(df1$treatment) != "double"){stop("Treatment variable is not numeric")}
-  if(typeof(df1$time) != "double"){stop("Time variable is not numeric")}
-  if(typeof(df1$outcome) != "double"){stop("Outcome variable is not numeric")}
+  if(typeof(df1$unit) != "double"){stop("Unit variable is not numeric. Please convert")}
+  if(typeof(df1$treatment) != "double"){stop("Treatment variable is not numeric. Please convert")}
+  if(typeof(df1$time) != "double"){stop("Time variable is not numeric. Please convert")}
+  if(typeof(df1$outcome) != "double"){stop("Outcome variable is not numeric. Please convert")}
+  if(sum(is.na(df1$treatment)) > 0){stop("Treatment variable contains missing values. Please omit those rows")}                                 
   
   # create outcome lag
   df1 <- df1[order(time), "lag_outcome" := shift(outcome, 1) , unit]
-   
                                     
   # create treatment lags
   df1 <- df1[order(time), sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x)) := shift(treatment, 1:treatment_lags) , unit]
@@ -69,7 +69,10 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   df1 <- as_tibble(df1)
   df1$time <- paste0(substr(df1$time,1,4),'-',substr(df1$time,5,6),'-01')
   df1$time <- as.Date(df1$time)
-    
+                                   
+  controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
+  df1 %>% drop_na(outcome, all_of(controlslist)) -> df1 
+                         
   ## Exact matching on treatment history
   if(qoi == "att"){
     # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
@@ -167,10 +170,10 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
         if(nrow(control.ps.set) == 1) {
           set$weight <- c(1,1)}
         vec.ratio <- control.ps.set$ps / (1 - control.ps.set$ps) #just for clarity
-        if(sum(vec.ratio, na.rm = T) == 0) {
+        if(sum(vec.ratio) == 0) {
           set$weight <- rep(1 / nrow(control.ps.set), nrow(control.ps.set))
         }
-        if(sum(vec.ratio, na.rm = T) > 0 & nrow(control.ps.set) > 1){
+        if(sum(vec.ratio) > 0 & nrow(control.ps.set) > 1){
           set$weight <- c((vec.ratio)/sum(vec.ratio), 1)
         }
         return(set)
