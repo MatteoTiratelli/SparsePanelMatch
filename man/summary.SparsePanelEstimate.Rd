@@ -2,7 +2,7 @@
 % Please edit documentation in R/Sparse_PanelEstimate.R
 \name{summary.SparsePanelEstimate}
 \alias{summary.SparsePanelEstimate}
-\title{Summarises a SparsePanelEstimate object}
+\title{summary.SparsePanelEstimate}
 \usage{
 \method{summary}{SparsePanelEstimate}(object, bias_correction = FALSE)
 }
