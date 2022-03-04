@@ -14,13 +14,13 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
   output <- data
   
   # Calculate qois
-  data <- data.table::setDT(output$summary)
-  data$ideological_change <- (data$outcome - data$lag_outcome)
-  Estimate <- tibble(coefs = sum(data$ideological_change*data$weight)/length(unique(data$group)))
+  df1 <- data.table::setDT(output$summary)
+  df1$ideological_change <- (df1$outcome - df1$lag_outcome)
+  Estimate <- tibble(coefs = sum(df1$ideological_change*df1$weight)/length(unique(df1$group)))
   Estimate$lead <- 't+0'
 
   if (output$outcome_leads > 0){
-    Estimate <- bind_rows(Estimate, tibble(coefs = sapply(1:output$outcome_leads, function(x) sum(sapply(sapply(1:output$outcome_leads, function (x) paste0('lead_outcome_',x)), function(x) (data[[x]] - data$lag_outcome))[,x]*data$weight, na.rm = TRUE)/length(unique(data$group))),
+    Estimate <- bind_rows(Estimate, tibble(coefs = sapply(1:output$outcome_leads, function(x) sum(sapply(sapply(1:output$outcome_leads, function (x) paste0('lead_outcome_',x)), function(x) (df1[[x]] - df1$lag_outcome))[,x]*df1$weight, na.rm = TRUE)/length(unique(df1$group))),
                                            lead = sapply(1:output$outcome_leads, function (x) paste0('t+',x))))
     Estimate <- Estimate[,c(2,1)]
   }
@@ -28,9 +28,9 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
   # Bootstrap SD
   boots <- matrix(NA, nrow = n_iterations, ncol = (output$outcome_leads+1))
   for (k in 1:n_iterations) {
-    clusters <- unique(data[['unit']])
+    clusters <- unique(df1[['unit']])
     units <- sample(clusters, size = length(clusters), replace = T)
-    df.bs <- lapply(units, function(x) which(data[,'unit'] == x)) # creates index of where in main dataset they match each element in 'units'
+    df.bs <- lapply(units, function(x) which(df1[,'unit'] == x)) # creates index of where in main dataset they match each element in 'units'
     d.sub1 <- data[unlist(df.bs),] # take those indexes to create new dataset
     boots[k,1] <- sum((d.sub1$outcome - d.sub1$lag_outcome)*d.sub1$weight, na.rm = T)/length(unique(d.sub1$group))
     if (output$outcome_leads > 0){
@@ -79,8 +79,8 @@ summary.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
 }
 
 
-plot.SparsePanelEstimate <- function(x, bias_correction = FALSE) {
-  plot.data <- x$summary
+plot.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
+  plot.data <- object$summary
   ylim <- c(min(min(plot.data$bootstrap_low),min(plot.data$bootstrap_low_BC)), max(max(plot.data$bootstrap_high),max(plot.data$bootstrap_high_BC)))
   if (bias_correction == FALSE){
     graphics::plot(x = 1:(nrow(plot.data)),y = plot.data$coefs, frame = TRUE, pch = 16, cex = 1.5,
