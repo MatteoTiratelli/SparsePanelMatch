@@ -43,15 +43,16 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   if(typeof(df1$treatment) != "double"){stop("Treatment variable is not numeric")}
   if(typeof(df1$time) != "double"){stop("Time variable is not numeric")}
   if(typeof(df1$outcome) != "double"){stop("Outcome variable is not numeric")}
-                                    
-  df1 %>% select(treatment, outcome, time, unit, starts_with(control)) -> df1
+  
+  # create outcome lag
+  df1 <- df1[order(time), "lag_outcome" := shift(outcome, 1) , unit]
+   
+  # remove na                                  
+  df1 %>% select(unit, time, treatment, outcome, lag_outcome, starts_with(control)) -> df1
   df1 <- na.omit(df1) # Please note this!
                                     
   # create treatment lags
   df1 <- df1[order(time), sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x)) := shift(treatment, 1:treatment_lags) , unit]
-
-  # create outcome lag
-  df1 <- df1[order(time), "lag_outcome" := shift(outcome, 1) , unit]
 
   # create outcome leads
   if (outcome_leads > 0) {
