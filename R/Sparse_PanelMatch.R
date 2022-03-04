@@ -68,6 +68,9 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   df1 <- as_tibble(df1)
   df1$time <- paste0(substr(df1$time,1,4),'-',substr(df1$time,5,6),'-01')
   df1$time <- as.Date(df1$time)
+  
+  contrlslst <- sapply(1:length(covs), function (x) paste0("control", x))                                 
+  df1 %>% drop_na(all_of(contrlslst)) -> df1                                 
 
   ## Exact matching on treatment history
   if(qoi == "att"){
