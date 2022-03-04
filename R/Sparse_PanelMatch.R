@@ -45,7 +45,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   if(typeof(df1$outcome) != "double"){stop("Outcome variable is not numeric")}
                                     
   df1 %>% select(treatment, outcome, time, unit, starts_with(control)) -> df1
-  df1 <- na.omit(df1)
+  df1 <- na.omit(df1) # Please note this!
                                     
   # create treatment lags
   df1 <- df1[order(time), sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x)) := shift(treatment, 1:treatment_lags) , unit]
