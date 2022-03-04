@@ -31,7 +31,7 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
     clusters <- unique(df1[['unit']])
     units <- sample(clusters, size = length(clusters), replace = T)
     df.bs <- lapply(units, function(x) which(df1[,'unit'] == x)) # creates index of where in main dataset they match each element in 'units'
-    d.sub1 <- data[unlist(df.bs),] # take those indexes to create new dataset
+    d.sub1 <- df1[unlist(df.bs),] # take those indexes to create new dataset
     boots[k,1] <- sum((d.sub1$outcome - d.sub1$lag_outcome)*d.sub1$weight, na.rm = T)/length(unique(d.sub1$group))
     if (output$outcome_leads > 0){
       boots[k,2:ncol(boots)] <- sapply(1:output$outcome_leads, function(x) sum(sapply(sapply(1:output$outcome_leads, function (x) paste0('lead_outcome_',x)), function(x) (d.sub1[[x]] - d.sub1$lag_outcome))[,x]*d.sub1$weight, na.rm = TRUE)/length(unique(d.sub1$group)))
