@@ -1,3 +1,5 @@
+#' SparsePanelMatch
+#' 
 #' Find matching units across irregular panel data:
 #' 1. Match each treated observation (unit-time) to untreated observations occurring within a user-defined time window 
 #' 2. Limit that matched set to control observations with exactly the same treatment history over the last n observations
@@ -29,7 +31,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
                               refinement_method = c("none","CBPS.weight", "CBPS.match", "ps.weight", "ps.match", "mahalanobis"),
                               size_match,
                               use_diagonal_covmat = FALSE) {
-
+  
   ## Prepare dataset
   # Rename vars
   df1 <- data.table::setDT(data)
@@ -38,7 +40,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   df1 <- setnames(df1, time, "time")
   df1 <- setnames(df1, unit, "unit")
   df1 <- setnames(df1, covs, sapply(1:length(covs), function (x) paste0("control", x)))                                   
-                                    
+  
   if(typeof(df1$unit) != "double"){stop("Unit variable is not numeric. Please convert")}
   if(typeof(df1$treatment) != "double"){stop("Treatment variable is not numeric. Please convert")}
   if(typeof(df1$time) != "double"){stop("Time variable is not numeric. Please convert")}
@@ -47,38 +49,37 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   # create outcome lag
   df1 <- df1[order(time), "lag_outcome" := shift(outcome, 1) , unit]
-                                    
+  
   # create treatment lags
   df1 <- df1[order(time), sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x)) := shift(treatment, 1:treatment_lags) , unit]
-
+  
   # create outcome leads
   if (outcome_leads > 0) {
     df1 <- df1[order(time), sapply(1:outcome_leads, function (x) paste0("lead_outcome_", x)) := shift(outcome, 1:outcome_leads, type=c("lead")) , unit]
   }
-
+  
   # Deal with missing treatment history values
-  lagindex <- grep('lag_treatment_', colnames(df1))
-  if (match_missing == FALSE) {
-    df1 <- df1[complete.cases(df1[, lagindex]),]
+    if (match_missing == FALSE) {
+      treatmentslist <- sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x))                               
+      df1 %>% drop_na(all_of(treatmentslist)) -> df1
   }
   if (match_missing == TRUE) {
     df1 %>%
       mutate(across(starts_with("lag_treatment_"), ~replace_na(., 99))) -> df1
   }
-
+  
   df1 <- as_tibble(df1)
   df1$time <- paste0(substr(df1$time,1,4),'-',substr(df1$time,5,6),'-01')
   df1$time <- as.Date(df1$time)
-                                   
-  controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
-  df1 %>% drop_na(outcome, all_of(controlslist)) -> df1 
-                         
+  
+  df1 %>% drop_na(outcome, lag_outcome) -> df1
+  
   ## Exact matching on treatment history
   if(qoi == "att"){
     # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
     units <- unique(df1$unit[df1$treatment == 1 & df1$lag_treatment_1 == 0])
   }
-
+  
   if(qoi == "atc"){
     # For each unit, find the dates when Treatment = 0, but was 1 at previous observation
     units <- unique(df1$unit[df1$treatment == 0 & df1$lag_treatment_1 == 1])
@@ -90,65 +91,70 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     map_dfc(setNames, object = list(numeric())) %>%
     cbind(output, .) -> output
   for (i in 1:length(units)){
-
+    
     if(qoi == "att"){
       # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
       listofdates <- df1$time[df1$unit == units[[i]] & df1$treatment == 1 & df1$lag_treatment_1 == 0]
     }
-
+    
     if(qoi == "atc"){
       # For each unit, find the dates when Treatment = 0, but was 1 at previous observation
       listofdates <- df1$time[df1$unit == units[[i]] & df1$treatment == 0 & df1$lag_treatment_1 == 1]
     }
-
+    
     for (x in 1:length(listofdates)) { # For each date, find other matching unites
-
+      
       # create list of treatment history for given treated observation
       list1 <- as.vector(df1[, lagindex][df1$unit == units[[i]] & df1$time == listofdates[[x]],])
-
+      
       # Subset by matching treatment history
       index <- which(apply(df1[, lagindex], 1, function(x) all(x == list1)))
       temp <- df1[index,]
-
+      
       # Refine subset by finding untreated observations in correct period from different unit
       tw <- time_window_in_months/2
       listofdates[[x]] %m-% months(tw) -> start
       listofdates[[x]] %m+% months(tw) -> end
       temp <- temp[temp$time %in% seq.Date(start, end, by = "month") & temp$treatment == 0 & temp$unit != units[[i]],]
-
+      
       if(nrow(temp) > 0) {
-
+        
         control <- temp
         control$group <- paste0(units[[i]],' ',listofdates[[x]])
         control$treatment <- 0
         control$weight <- 1/nrow(temp)
-
+        
         treated <- df1[df1$time == listofdates[[x]] & df1$unit == units[[i]],]
         treated$group <- paste0(units[[i]],' ',listofdates[[x]])
         treated$treatment <- 1
         treated$weight <- 1
-
+        
         set <- bind_rows(treated, control)
         output <- bind_rows(output, set)
       }
     }
   }
-
+  
   ## Refinement
-
+  
+  if(refinement_method != 'none') {
+    controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
+    output %>% drop_na(all_of(controlslist)) -> output 
+  }
+  
   if(refinement_method %in% c("CBPS.weight", "CBPS.match", "ps.weight", "ps.match")) {
-
+    
     # CBPS and PS matching
     if(refinement_method == "CBPS.weight" | refinement_method == "CBPS.match"){
       fit0 <- (CBPS::CBPS(reformulate(response = 'treatment', termlabels = sapply(1:length(covs), function (x) paste0("control", x))),
                           family = binomial(link = "logit"), data = output))
     }
-
+    
     if(refinement_method == "ps.weight" | refinement_method == "ps.match"){
       fit0 <- glm(reformulate(response = 'treatment', termlabels = sapply(1:length(covs), function (x) paste0("control", x))),
                   family = binomial(link = "logit"), data = output)
     }
-
+    
     # Calculate initial inverse propensity score weights (Hirano et al. 2003) [same method for CBPS]
     inverse_PS_weighting <- function (x, B) {
       xx <- cbind(1, as.matrix(x[, sapply(1:length(covs), function (y) paste0("control", y))]))
@@ -156,13 +162,13 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
       names(x)[ncol(x)] <- "ps"
       return(x)
     }
-
+    
     sets <- split(output, f = output$group)
     sets_with_ps <- lapply(sets, inverse_PS_weighting, B = fit0$coefficients)
-
-
+    
+    
     # Calculate final normalised weights, or match by size_match
-
+    
     if(refinement_method == "CBPS.weight" | refinement_method == "ps.weight"){
       adjust_weights <- function(set) {
         set <- arrange(set, treatment)
@@ -181,7 +187,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
       sets <- lapply(sets_with_ps, adjust_weights)
       output <- bind_rows(sets)
     }
-
+    
     if(refinement_method == "CBPS.match" | refinement_method == "ps.match"){
       restrict_sets <- function(set, size_match) {
         if((nrow(set)-1) > size_match){
@@ -197,11 +203,11 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
       output <- bind_rows(sets)
     }
   }
-
+  
   if(refinement_method == "mahalanobis") {
-
+    
     sets <- split(output, f = output$group)
-
+    
     # For each matched set, use unit ids to find ind all other observations of those units
     build_maha_sets <- function(set){
       if((nrow(set)-1) > size_match){
@@ -211,41 +217,41 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
         return(expandedset)
       }
     }
-
+    
     maha_sets <- lapply(sets, build_maha_sets)
     maha_sets <- maha_sets[lengths(maha_sets) > 0]
-
+    
     # For each of the new Maha sets, calculate mahalanobis distance for each observation compared to the treated observation from original matched set, then take average for each unit
     maha_calculations <- function(set, size.match = size_match, use.diagonal.covmat = use_diagonal_covmat) {
       if(nrow(set) > (size.match+1)) {
-
+        
         center.data <- set[set$unit == 999999999,][, sapply(1:length(covs), function (y) paste0("control", y))]
         set <- set[set$unit != 999999999,]
         cov.data <- set[, sapply(1:length(covs), function (y) paste0("control", y))]
-
+        
         if(use.diagonal.covmat == TRUE) {
           cov.matrix <- diag(apply(cov.data, 2, var), ncol(cov.data), ncol(cov.data))
         }
         if (use.diagonal.covmat == FALSE) {
           cov.matrix <- cov(cov.data)
         }
-
+        
         set$maha <- tryCatch({
           mahalanobis(x = as.matrix(cov.data), center = as.matrix(center.data), cov = as.matrix(cov.matrix))
         }, warning = function(w) {
-
+          
         }, error = function(e) {
           cov.matrix <- cov(cov.data)
           cov.matrix <- MASS::ginv(cov.matrix)
           mahalanobis(x = as.matrix(cov.data), center = as.matrix(center.data), cov = as.matrix(cov.matrix), inverted = TRUE)
         })
-        set %>% group_by(unit) %>% summarise(maha = mean(maha, na.rm = T)) -> set
+        set %>% group_by(unit) %>% summarise(maha = mean(maha)) -> set
         return(set)
       }
     }
-
+    
     maha_sets_distance <- lapply(maha_sets, maha_calculations)
-
+    
     # Merge to add mean maha distance to original sets
     listofdfs <- names(maha_sets_distance)
     for (i in 1:length(listofdfs)) {
@@ -253,7 +259,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
       y <- sets[[listofdfs[[i]]]]
       sets[[listofdfs[[i]]]] <- merge(x,y, by = 'unit', all = TRUE)
     }
-
+    
     # Restrict size of each matched set to size_match
     restrict_sets_maha <- function(set, size.match = size_match) {
       treated_maha <- set[set$treatment == 1,]
@@ -264,14 +270,14 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
       set$maha <- NULL
       return(set)
     }
-
+    
     for (i in 1:length(listofdfs)) {
       sets[[listofdfs[[i]]]] <- restrict_sets_maha(sets[[listofdfs[[i]]]])
     }
-
+    
     output <- bind_rows(sets)
   }
-
+  
   # Generate output
   output <- list(summary = as_tibble(output),
                  qoi = qoi,
