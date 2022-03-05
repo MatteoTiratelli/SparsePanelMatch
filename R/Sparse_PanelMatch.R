@@ -138,12 +138,10 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   ## Refinement
   
-  if(refinement_method != 'none') {
-    controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
-    output %>% drop_na(all_of(controlslist)) -> output 
-  }
-  
   if(refinement_method %in% c("CBPS.weight", "CBPS.match", "ps.weight", "ps.match")) {
+    
+    controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
+    output %>% drop_na(all_of(controlslist)) -> output
     
     # CBPS and PS matching
     if(refinement_method == "CBPS.weight" | refinement_method == "CBPS.match"){
@@ -207,6 +205,8 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   if(refinement_method == "mahalanobis") {
     
+    controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
+    output %>% drop_na(all_of(controlslist)) -> output
     sets <- split(output, f = output$group)
     
     # For each matched set, use unit ids to find ind all other observations of those units
