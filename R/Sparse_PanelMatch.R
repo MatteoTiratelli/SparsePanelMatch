@@ -91,7 +91,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   names(select(df1, starts_with("control"))) %>%
     map_dfc(setNames, object = list(numeric())) %>%
     cbind(output, .) -> output
-  for (i in 1:length(units)){
+  for (i in 1:length(units)){ # This could definitely be made more efficient
     
     if(qoi == "att"){
       # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
