@@ -1,4 +1,4 @@
-#' SparsePanelMatch
+#' Sparse_PanelMatch
 #' 
 #' Find matching units across irregular panel data:
 #' 1. Match each treated observation (unit-time) to untreated observations occurring within a user-defined time window 
