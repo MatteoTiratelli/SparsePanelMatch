@@ -59,6 +59,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   }
   
   # Deal with missing treatment history values
+  lagindex <- grep('lag_treatment_', colnames(df1))                                 
     if (match_missing == FALSE) {
       treatmentslist <- sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x))                               
       df1 %>% drop_na(all_of(treatmentslist)) -> df1
