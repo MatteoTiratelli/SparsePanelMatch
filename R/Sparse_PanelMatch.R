@@ -243,7 +243,6 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
           
         }, error = function(e) {
           cov.matrix <- cov(cov.data)
-          cov.matrix <- MASS::ginv(cov.matrix)
           mahalanobis(x = as.matrix(cov.data), center = as.matrix(center.data), cov = as.matrix(cov.matrix), inverted = TRUE)
         })
         set %>% group_by(unit) %>% summarise(maha = mean(maha)) -> set
