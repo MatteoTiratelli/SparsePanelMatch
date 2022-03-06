@@ -43,9 +43,12 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   if(typeof(df1$unit) != "double"){stop("Unit variable is not numeric. Please convert")}
   if(typeof(df1$treatment) != "double"){stop("Treatment variable is not numeric. Please convert")}
-  if(typeof(df1$time) != "double"){stop("Time variable is not numeric. Please convert")}
+  if(typeof(df1$time) != "double"){stop("Time variable is not numeric. Please convert to YYYYMM format and structure as a numeric variable")}
   if(typeof(df1$outcome) != "double"){stop("Outcome variable is not numeric. Please convert")}
-  if(sum(is.na(df1$treatment)) > 0){stop("Treatment variable contains missing values. Please omit those rows")}                                 
+  if(sum(is.na(df1$treatment)) > 0){stop("Treatment variable contains missing values. Please omit those rows")}
+  if(sum(is.na(df1$unit)) > 0){stop("Unit variable contains missing values. Please omit those rows")} 
+  if(sum(is.na(df1$time)) > 0){stop("Time variable contains missing values. Please omit those rows")}                                   
+                                  
   
   # create outcome lag
   df1 <- df1[order(time), "lag_outcome" := shift(outcome, 1) , unit]
@@ -75,7 +78,9 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   df1 %>% drop_na(outcome, lag_outcome) -> df1
   
+                               
   ## Exact matching on treatment history
+                               
   if(qoi == "att"){
     # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
     units <- unique(df1$unit[df1$treatment == 1 & df1$lag_treatment_1 == 0])
@@ -91,6 +96,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   names(select(df1, starts_with("control"))) %>%
     map_dfc(setNames, object = list(numeric())) %>%
     cbind(output, .) -> output
+                               
   for (i in 1:length(units)){ # This could definitely be made more efficient
     
     if(qoi == "att"){
@@ -135,6 +141,8 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
       }
     }
   }
+                           
+  print("Exact matching complete. Starting refinement...")                         
   
   ## Refinement
   
