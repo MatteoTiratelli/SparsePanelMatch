@@ -25,7 +25,7 @@ Sparse_PanelMatch(
 \arguments{
 \item{data}{The name of the dataset}
 
-\item{time}{String of characters representing the name of the time variable. Should be in YYYYMM (e.g. 199204) format and structured as numeric variable.}
+\item{time}{String of characters representing the name of the time variable. Should be in Date format.}
 
 \item{unit}{String of characters representing the name of the unit variable. Should be a numeric variable.}
 
