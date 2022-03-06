@@ -6,7 +6,7 @@
 #' 3. Within that matched set, refine further or weight using Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
 #' 
 #' @param data The name of the dataset
-#' @param time String of characters representing the name of the time variable. Should be in YYYYMM (e.g. 199204) format and structured as numeric variable.
+#' @param time String of characters representing the name of the time variable. Should be in Date format.
 #' @param unit String of characters representing the name of the unit variable. Should be a numeric variable.
 #' @param treatment String of characters representing the name of the treatment variable. Should be numeric variable where 0 = untreated and 1 = treated.
 #' @param outcome String of characters representing the name of the outcome variable. Should be a numeric variable.
@@ -41,13 +41,13 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   df1 <- setnames(df1, unit, "unit")
   df1 <- setnames(df1, covs, sapply(1:length(covs), function (x) paste0("control", x)))                                   
   
-  if(typeof(df1$unit) != "double"){stop("Unit variable is not numeric. Please convert")}
-  if(typeof(df1$treatment) != "double"){stop("Treatment variable is not numeric. Please convert")}
-  if(typeof(df1$time) != "double"){stop("Time variable is not numeric. Please convert to YYYYMM format and structure as a numeric variable")}
-  if(typeof(df1$outcome) != "double"){stop("Outcome variable is not numeric. Please convert")}
-  if(sum(is.na(df1$treatment)) > 0){stop("Treatment variable contains missing values. Please omit those rows")}
-  if(sum(is.na(df1$unit)) > 0){stop("Unit variable contains missing values. Please omit those rows")} 
-  if(sum(is.na(df1$time)) > 0){stop("Time variable contains missing values. Please omit those rows")}                                   
+  if(class(df1$unit) != "numeric"){stop("Unit variable is not numeric. Please convert")}
+  if(class(df1$treatment) != "numeric"){stop("Treatment variable is not numeric. Please convert")}
+  if(class(df1$time) != "Date"){stop("Time variable is not in Date format. Please convert")}
+  if(class(df1$outcome) != "numeric"){stop("Outcome variable is not numeric. Please convert")}
+  if(sum(is.na(df1$treatment)) > 0){stop("Treatment variable contains missing values.")}
+  if(sum(is.na(df1$unit)) > 0){stop("Unit variable contains missing values.")} 
+  if(sum(is.na(df1$time)) > 0){stop("Time variable contains missing values.")}                                   
                                   
   
   # create outcome lag
@@ -73,8 +73,6 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   }
   
   df1 <- as_tibble(df1)
-  df1$time <- paste0(substr(df1$time,1,4),'-',substr(df1$time,5,6),'-01')
-  df1$time <- as.Date(df1$time)
   
   df1 %>% drop_na(outcome, lag_outcome) -> df1
   
