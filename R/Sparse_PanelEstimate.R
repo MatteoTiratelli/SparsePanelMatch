@@ -64,13 +64,6 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
 }
 
 
-#' Summarises a SparsePanelEstimate object
-#'
-#' @param object A SparsePanelEstimate object
-#' @examples
-#' MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
-#' Estimate <- Sparse_PanelEstimate(data = MatchedData, n_iterations = 1000, alpha = 0.05)
-#' summary(Estimate, bias_correction = TRUE)
 summary.SparsePanelEstimate <- function(object) {
   cat(" Matched DiD estimate of",toupper(object$qoi),'with refinement by',object$refinement_method,'\n With bootstrapped standard errors (using',object$n_iterations,"iterations, alpha =",object$alpha,")\n Bias corrected confidence intervals also available.\n\n")
   print(object$summary %>% select(lead, coefs, bootstrap_sd, bootstrap_low, bootstrap_high))
