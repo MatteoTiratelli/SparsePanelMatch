@@ -67,35 +67,23 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
 #' Summarises a SparsePanelEstimate object
 #'
 #' @param object A SparsePanelEstimate object
-#' @param bias_correction Whether to display bias corrected confidence intervals (Efron & Tibshirani 1993 p138), or standard percentile confidence intervals, Defaults to FALSE (standard percentiles).
 #' @examples
 #' MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
 #' Estimate <- Sparse_PanelEstimate(data = MatchedData, n_iterations = 1000, alpha = 0.05)
 #' summary(Estimate, bias_correction = TRUE)
-summary.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
-  cat(" Matched DiD estimate of",toupper(object$qoi),'with refinement by',object$refinement_method,'\n With bootstrapped standard errors (using',object$n_iterations,"iterations, alpha =",object$alpha,")\n Bias corrected confidence intervals available using the bias_correction argument\n\n")
-  if(bias_correction == FALSE){print(object$summary %>% select(lead, coefs, bootstrap_sd, bootstrap_low, bootstrap_high))}
-  if(bias_correction == TRUE){print(object$summary %>% select(lead, coefs, bootstrap_sd, bootstrap_low_BC, bootstrap_high_BC))}
+summary.SparsePanelEstimate <- function(object) {
+  cat(" Matched DiD estimate of",toupper(object$qoi),'with refinement by',object$refinement_method,'\n With bootstrapped standard errors (using',object$n_iterations,"iterations, alpha =",object$alpha,")\n Bias corrected confidence intervals also available.\n\n")
+  print(object$summary %>% select(lead, coefs, bootstrap_sd, bootstrap_low, bootstrap_high))
 }
 
 
-plot.SparsePanelEstimate <- function(object, bias_correction = FALSE) {
+plot.SparsePanelEstimate <- function(object) {
   plotdata <- object$summary
   ylim <- c(min(min(plotdata$bootstrap_low),min(plotdata$bootstrap_low_BC)), max(max(plotdata$bootstrap_high),max(plotdata$bootstrap_high_BC)))
-  if (bias_correction == FALSE){
     graphics::plot(x = 1:(nrow(plotdata)),y = plotdata$coefs, frame = TRUE, pch = 16, cex = 1.5,
                    xaxt = "n", ylab = paste0("Estimated ",toupper(object$qoi)), xlab = "Time", ylim = ylim,
                    main = "Estimated Effects of Treatment Over Time")
     graphics::axis(side = 1, at = 1:nrow(plotdata), labels = plotdata$lead)
     graphics::segments(1:(nrow(plotdata)), plotdata$bootstrap_low, 1:(nrow(plotdata)), plotdata$bootstrap_high)
     graphics::abline(h = 0, lty = "dashed")
-  }
-  if (bias_correction == TRUE){
-    graphics::plot(x = 1:(nrow(plotdata)),y = plotdata$coefs, frame = TRUE, pch = 16, cex = 1.5,
-                   xaxt = "n", ylab = paste0("Estimated ",toupper(object$qoi), " (bias corrected)"), xlab = "Time", ylim = ylim,
-                   main = "Estimated Effects of Treatment Over Time")
-    graphics::axis(side = 1, at = 1:nrow(plotdata), labels = plotdata$lead)
-    graphics::segments(1:(nrow(plotdata)), plotdata$bootstrap_low_BC, 1:(nrow(plotdata)), plotdata$bootstrap_high_BC)
-    graphics::abline(h = 0, lty = "dashed")
-  }
 }
