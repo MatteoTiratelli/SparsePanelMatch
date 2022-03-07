@@ -4,15 +4,13 @@
 \alias{summary.SparsePanelEstimate}
 \title{summary.SparsePanelEstimate}
 \usage{
-\method{summary}{SparsePanelEstimate}(object, bias_correction = FALSE)
+\method{summary}{SparsePanelEstimate}(object)
 }
 \arguments{
 \item{object}{A SparsePanelEstimate object}
-
-\item{bias_correction}{Whether to display bias corrected confidence intervals (Efron & Tibshirani 1993 p138), or standard percentile confidence intervals, Defaults to FALSE (standard percentiles).}
 }
 \description{
-Summarises a SparsePanelEstimate object
+Summarises a SparsePanelEstimate object. By default returns standard percentile confidence intervals. Bias corrected confidence intervals (Efron & Tibshirani 1993 p138) are also available in the SparsePanelEstimate object.
 }
 \examples{
 MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
