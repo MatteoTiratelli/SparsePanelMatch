@@ -138,7 +138,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   sets <- lapply(units, find_exact_matches)                         
   output <- bind_rows(sets)                         
-  print("Exact matching complete. Starting refinement...")                         
+  cat("Exact matching complete. Starting refinement with", refinement_method)                         
   
   ## Refinement
   
@@ -149,7 +149,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     
     # CBPS and PS matching
     if(refinement_method == "CBPS.weight" | refinement_method == "CBPS.match") {
-      fit0 <- (CBPS::CBPS(reformulate(response = 'treatment', termlabels = sapply(1:length(covs), function (x) paste0("control", x))),
+      quiet <- capture.output(fit0 <- CBPS::CBPS(reformulate(response = 'treatment', termlabels = sapply(1:length(covs), function (x) paste0("control", x))),
                           family = binomial(link = "logit"), data = output))
     }
     
