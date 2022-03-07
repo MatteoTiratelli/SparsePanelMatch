@@ -48,7 +48,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   if(sum(is.na(df1$treatment)) > 0){stop("Treatment variable contains missing values.")}
   if(sum(is.na(df1$unit)) > 0){stop("Unit variable contains missing values.")} 
   if(sum(is.na(df1$time)) > 0){stop("Time variable contains missing values.")}                                   
-                                  
+  
   
   # create outcome lag
   df1 <- df1[order(time), "lag_outcome" := shift(outcome, 1) , unit]
@@ -63,9 +63,9 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   # Deal with missing treatment history values
   lagindex <- grep('lag_treatment_', colnames(df1))                                 
-    if (match_missing == FALSE) {
-      treatmentslist <- sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x))                               
-      df1 %>% drop_na(all_of(treatmentslist)) -> df1
+  if (match_missing == FALSE) {
+    treatmentslist <- sapply(1:treatment_lags, function (x) paste0("lag_treatment_", x))                               
+    df1 %>% drop_na(all_of(treatmentslist)) -> df1
   }
   if (match_missing == TRUE) {
     df1 %>%
@@ -76,9 +76,9 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   df1 %>% drop_na(outcome, lag_outcome) -> df1
   
-                               
+  
   ## Exact matching on treatment history
-                               
+  
   if(qoi == "att"){
     # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
     units <- unique(df1$unit[df1$treatment == 1 & df1$lag_treatment_1 == 0])
@@ -88,58 +88,56 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     # For each unit, find the dates when Treatment = 0, but was 1 at previous observation
     units <- unique(df1$unit[df1$treatment == 0 & df1$lag_treatment_1 == 1])
   }
-  output <- tibble(unit = numeric(), time = base::as.Date(character()), outcome = numeric(),
-                   lag_outcome = numeric(),
-                   group = character(), treatment = numeric(), weight = numeric())
-  names(select(df1, starts_with("control"))) %>%
-    map_dfc(setNames, object = list(numeric())) %>%
-    cbind(output, .) -> output
-                               
-  for (i in 1:length(units)){ # This could definitely be made more efficient
+  
+  find_controls <- function (x, y) { # For each treatment unit, find matching control unites
+    
+    # create list of treatment history for given treated observation
+    list1 <- as.vector(df1[, lagindex][df1$unit == y & df1$time == x,])
+    
+    # Subset by matching treatment history
+    index <- which(apply(df1[, lagindex], 1, function(x) all(x == list1)))
+    temp <- df1[index,]
+    
+    # Refine subset by finding untreated observations in time window
+    tw <- time_window_in_months/2
+    x %m-% months(tw) -> start
+    x %m+% months(tw) -> end
+    temp <- temp[temp$time %in% seq.Date(start, end, by = "month") & temp$treatment == 0 & temp$unit != y,]
+    
+    if(nrow(temp) > 0) {
+      
+      control <- temp
+      control$group <- paste0(y,' ',x)
+      control$treatment <- 0
+      control$weight <- 1/nrow(temp)
+      
+      treated <- df1[df1$time == x & df1$unit == y,]
+      treated$group <- paste0(y,' ',x)
+      treated$treatment <- 1
+      treated$weight <- 1
+      
+      set <- bind_rows(treated, control)
+      return(set)
+    }
+  }                             
+  
+  find_exact_matches <- function (z) { # Identify treatment units
     
     if(qoi == "att"){
       # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
-      listofdates <- df1$time[df1$unit == units[[i]] & df1$treatment == 1 & df1$lag_treatment_1 == 0]
+      listofdates <- df1$time[df1$unit == z & df1$treatment == 1 & df1$lag_treatment_1 == 0]
     }
     
     if(qoi == "atc"){
       # For each unit, find the dates when Treatment = 0, but was 1 at previous observation
-      listofdates <- df1$time[df1$unit == units[[i]] & df1$treatment == 0 & df1$lag_treatment_1 == 1]
+      listofdates <- df1$time[df1$unit == z & df1$treatment == 0 & df1$lag_treatment_1 == 1]
     }
     
-    for (x in 1:length(listofdates)) { # For each date, find other matching unites
-      
-      # create list of treatment history for given treated observation
-      list1 <- as.vector(df1[, lagindex][df1$unit == units[[i]] & df1$time == listofdates[[x]],])
-      
-      # Subset by matching treatment history
-      index <- which(apply(df1[, lagindex], 1, function(x) all(x == list1)))
-      temp <- df1[index,]
-      
-      # Refine subset by finding untreated observations in correct period from different unit
-      tw <- time_window_in_months/2
-      listofdates[[x]] %m-% months(tw) -> start
-      listofdates[[x]] %m+% months(tw) -> end
-      temp <- temp[temp$time %in% seq.Date(start, end, by = "month") & temp$treatment == 0 & temp$unit != units[[i]],]
-      
-      if(nrow(temp) > 0) {
-        
-        control <- temp
-        control$group <- paste0(units[[i]],' ',listofdates[[x]])
-        control$treatment <- 0
-        control$weight <- 1/nrow(temp)
-        
-        treated <- df1[df1$time == listofdates[[x]] & df1$unit == units[[i]],]
-        treated$group <- paste0(units[[i]],' ',listofdates[[x]])
-        treated$treatment <- 1
-        treated$weight <- 1
-        
-        set <- bind_rows(treated, control)
-        output <- bind_rows(output, set)
-      }
-    }
+    lapply(listofdates, find_controls, y = z) # Find matching controls
   }
-                           
+  
+  sets <- lapply(units, find_exact_matches)                         
+  output <- bind_rows(sets)                         
   print("Exact matching complete. Starting refinement...")                         
   
   ## Refinement
@@ -150,12 +148,12 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     output %>% drop_na(all_of(controlslist)) -> output
     
     # CBPS and PS matching
-    if(refinement_method == "CBPS.weight" | refinement_method == "CBPS.match"){
+    if(refinement_method == "CBPS.weight" | refinement_method == "CBPS.match") {
       fit0 <- (CBPS::CBPS(reformulate(response = 'treatment', termlabels = sapply(1:length(covs), function (x) paste0("control", x))),
                           family = binomial(link = "logit"), data = output))
     }
     
-    if(refinement_method == "ps.weight" | refinement_method == "ps.match"){
+    if(refinement_method == "ps.weight" | refinement_method == "ps.match") {
       fit0 <- glm(reformulate(response = 'treatment', termlabels = sapply(1:length(covs), function (x) paste0("control", x))),
                   family = binomial(link = "logit"), data = output)
     }
@@ -174,7 +172,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     
     # Calculate final normalised weights, or match by size_match
     
-    if(refinement_method == "CBPS.weight" | refinement_method == "ps.weight"){
+    if(refinement_method == "CBPS.weight" | refinement_method == "ps.weight") {
       adjust_weights <- function(set) {
         set <- arrange(set, treatment)
         control.ps.set <- set[set$treatment == 0,]
@@ -184,7 +182,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
         if(sum(vec.ratio) == 0) {
           set$weight <- rep(1 / nrow(control.ps.set), nrow(control.ps.set))
         }
-        if(sum(vec.ratio) > 0 & nrow(control.ps.set) > 1){
+        if(sum(vec.ratio) > 0 & nrow(control.ps.set) > 1) {
           set$weight <- c((vec.ratio)/sum(vec.ratio), 1)
         }
         return(set)
@@ -299,10 +297,11 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
 }
 
 
+
 summary.SparsePanelMatch <- function(object) {
   cat(" Matched DiD for Time-Series Cross-Sectional Data (Imai, Kim & Wang 2018)\n Method adapted by matching treated to untreated observations within",object$time_window_in_months,
       "month window\n Exact matching using treatment history over",
       object$treatment_lags,"periods\n Matches refined using",object$refinement_method,
-      "with covariates:",paste(object$covs, collapse = ', '),'\n\n')
+      "with covariates:",paste(object$covs, collapse = ', '),'\n ',length(unique(object$summary$group)),'matched sets. Overall n = ',nrow(matches$summary),'\n\n')
   object$summary
 }
