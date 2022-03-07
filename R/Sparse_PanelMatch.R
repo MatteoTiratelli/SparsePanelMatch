@@ -32,7 +32,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
                               size_match,
                               use_diagonal_covmat = FALSE) {
   
-  ## Prepare dataset
+  ### Prepare dataset
   # Rename vars
   df1 <- data.table::setDT(data)
   df1 <- setnames(df1, treatment, "treatment")
@@ -77,8 +77,8 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   df1 %>% drop_na(outcome, lag_outcome) -> df1
   
   
-  ## Exact matching on treatment history
-  
+  ### Exact matching on treatment history  
+                             
   if(qoi == "att"){
     # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
     units <- unique(df1$unit[df1$treatment == 1 & df1$lag_treatment_1 == 0])
@@ -104,7 +104,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     x %m+% months(tw) -> end
     temp <- temp[temp$time %in% seq.Date(start, end, by = "month") & temp$treatment == 0 & temp$unit != y,]
     
-    if(nrow(temp) > 0) {
+    if(nrow(temp) > 0) { # If there are matching control units, collate and weigh them
       
       control <- temp
       control$group <- paste0(y,' ',x)
@@ -123,13 +123,11 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   find_exact_matches <- function (z) { # Identify treatment units
     
-    if(qoi == "att"){
-      # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
+    if(qoi == "att"){ # For each unit, find the dates when Treatment = 1, but was 0 at previous observation
       listofdates <- df1$time[df1$unit == z & df1$treatment == 1 & df1$lag_treatment_1 == 0]
     }
     
-    if(qoi == "atc"){
-      # For each unit, find the dates when Treatment = 0, but was 1 at previous observation
+    if(qoi == "atc"){ # For each unit, find the dates when Treatment = 0, but was 1 at previous observation
       listofdates <- df1$time[df1$unit == z & df1$treatment == 0 & df1$lag_treatment_1 == 1]
     }
     
@@ -138,9 +136,10 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   sets <- lapply(units, find_exact_matches)                         
   output <- bind_rows(sets)                         
-  cat("Exact matching complete. Starting refinement with", refinement_method)                         
+  cat("Exact matching complete. Starting refinement with", refinement_method,'\n')                         
   
-  ## Refinement
+                         
+  ### Refinement
   
   if(refinement_method %in% c("CBPS.weight", "CBPS.match", "ps.weight", "ps.match")) {
     
