@@ -7,14 +7,14 @@
 Sparse_PanelEstimate(data, n_iterations = 1000, alpha = 0.05)
 }
 \arguments{
-\item{data}{A SparsePanelMatch}
+\item{data}{A SparsePanelMatch object.}
 
-\item{n_iterations}{The number of iterations to use for bootstrapping (defaults to 1000)}
+\item{n_iterations}{The number of iterations to use for bootstrapping (defaults to 1000).}
 
-\item{alpha}{The alpha level to use when calculating the confidence intervals (defaults to 0.05)}
+\item{alpha}{The alpha level to use when calculating the confidence intervals (defaults to 0.05).}
 }
 \value{
-A SparsePanelEstimate object
+A SparsePanelEstimate object.
 }
 \description{
 Estimate DiD estimator for Sparse_PanelMatch object with bootstrapped standard errors

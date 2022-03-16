@@ -23,7 +23,7 @@ Sparse_PanelMatch(
 )
 }
 \arguments{
-\item{data}{The name of the dataset}
+\item{data}{The name of the dataset.}
 
 \item{time}{String of characters representing the name of the time variable. Should be in Date format.}
 

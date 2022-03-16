@@ -2,10 +2,10 @@
 #' 
 #' Estimate DiD estimator for Sparse_PanelMatch object with bootstrapped standard errors
 #'
-#' @param data A SparsePanelMatch
-#' @param n_iterations The number of iterations to use for bootstrapping (defaults to 1000)
-#' @param alpha The alpha level to use when calculating the confidence intervals (defaults to 0.05)
-#' @return A SparsePanelEstimate object
+#' @param data A SparsePanelMatch object.
+#' @param n_iterations The number of iterations to use for bootstrapping (defaults to 1000).
+#' @param alpha The alpha level to use when calculating the confidence intervals (defaults to 0.05).
+#' @return A SparsePanelEstimate object.
 #' @examples
 #' MatchedData <- Sparse_PanelMatch(data = CMP, time = "date", unit = "party", treatment = "wasingov", outcome = "sdper103", treatment_lags = 3, outcome_leads = 0, time_window_in_months = 60, match_missing = TRUE, covs = c("pervote", "lag_sd_rile"), qoi = "att", refinement_method = "mahalanobis", size_match = 5, use_diagonal_covmat = TRUE)
 #' Sparse_PanelEstimate(data = MatchedData, n_iterations = 1000, alpha = 0.05)

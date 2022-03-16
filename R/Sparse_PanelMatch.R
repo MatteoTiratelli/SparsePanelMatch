@@ -5,7 +5,7 @@
 #' 2. Limit that matched set to control observations with exactly the same treatment history over the last n observations
 #' 3. Within that matched set, refine further or weight using Propensity Scores, Covariate Balancing Propensity Scores or Mahalanobis distance
 #' 
-#' @param data The name of the dataset
+#' @param data The name of the dataset.
 #' @param time String of characters representing the name of the time variable. Should be in Date format.
 #' @param unit String of characters representing the name of the unit variable. Should be a numeric variable.
 #' @param treatment String of characters representing the name of the treatment variable. Should be numeric variable where 0 = untreated and 1 = treated.

@@ -9,4 +9,4 @@ License: CC BY
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.2
-Imports: data.table, lubridate, CBPS, MASS, stats, graphics, dplyr, magrittr, purrr, tibble, tidyr, tidyselect
+Imports: data.table, lubridate, CBPS, MASS, stats, graphics, dplyr, magrittr, purrr, tibble, tidyr, tidyselect, ggplot2
