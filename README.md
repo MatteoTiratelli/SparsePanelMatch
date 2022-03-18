@@ -56,7 +56,7 @@ In the example below, we match observations which (a) occurred within a 5 period
 **Example code:**
 ``` r
 estimates <- Sparse_PanelEstimate(data = matches, n_iterations = 1000, alpha = 0.05)
-plot(estimates, bias_correction = TRUE)
+plot(estimates)
 ```
 
 1. The package then allows users to calculate the Average Treatment effect on Treated/Control via a Difference-in-Difference estimator: within each matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. In pseudo-code: `DiD = (Yt - Yt-1) - mean(Y't - Y't-1)`, where `Yt` is the outcome variable for the treated observation at time `t`, and `Y't` is the outcome variable for a control observation at time `t`.
