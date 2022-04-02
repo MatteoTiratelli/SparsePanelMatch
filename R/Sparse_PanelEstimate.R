@@ -27,7 +27,7 @@ Sparse_PanelEstimate <- function(data, n_iterations = 1000, alpha = 0.05) {
                                            lead = sapply(1:output$outcome_leads, function (x) paste0('t+',x))))
     Estimate <- Estimate[,c(2,1)]
   }
-  
+  cat("Coefficients calculated. Beginning bootstrapping\n")                         
   # Bootstrap SD
   boots <- matrix(NA, nrow = n_iterations, ncol = (output$outcome_leads+1))
   for (k in 1:n_iterations) {
