@@ -34,7 +34,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   
   ### Prepare dataset
   # Rename vars
-  df1 <- data.table::setDT(data)
+  df1 <- data.table::as.data.table(data)
   df1 <- setnames(df1, treatment, "treatment")
   df1 <- setnames(df1, outcome, "outcome")
   df1 <- setnames(df1, time, "time")
