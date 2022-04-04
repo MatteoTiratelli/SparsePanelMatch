@@ -35,10 +35,10 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   ### Prepare dataset
   # Rename vars
   df1 <- data.table::setDT(data)
-  df1 <- setnames(df1, treatment, "treatment")
-  df1 <- setnames(df1, outcome, "outcome")
-  df1 <- setnames(df1, time, "time")
-  df1 <- setnames(df1, unit, "unit")
+  df1 <- setnames(df1, treatment, "treatment", skip_absent=TRUE)
+  df1 <- setnames(df1, outcome, "outcome", skip_absent=TRUE)
+  df1 <- setnames(df1, time, "time", skip_absent=TRUE)
+  df1 <- setnames(df1, unit, "unit", skip_absent=TRUE)
   df1 <- setnames(df1, covs, sapply(1:length(covs), function (x) paste0("control", x)))                                   
   
   if(class(df1$unit) != "numeric"){stop("Unit variable is not numeric. Please convert")}
