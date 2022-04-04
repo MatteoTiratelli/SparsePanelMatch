@@ -218,66 +218,44 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
         listofunits <- unique(set$unit[set$treatment == 0])
         expandedset <- df1[df1$unit %in% listofunits,]
         expandedset <- add_row(expandedset, cbind(set[set$treatment == 1,][, sapply(1:length(covs), function (y) paste0("control", y))], unit = 999999999))
-        return(expandedset)
-      }
-    }
-    
-    maha_sets <- lapply(sets, build_maha_sets)
-    maha_sets <- maha_sets[lengths(maha_sets) > 0]
-    
-    # For each of the new Maha sets, calculate mahalanobis distance for each observation compared to the treated observation from original matched set, then take average for each unit
-    maha_calculations <- function(set, size.match = size_match, use.diagonal.covmat = use_diagonal_covmat) {
-      if(nrow(set) > (size.match+1)) {
         
-        center.data <- set[set$unit == 999999999,][, sapply(1:length(covs), function (y) paste0("control", y))]
-        set <- set[set$unit != 999999999,]
-        cov.data <- set[, sapply(1:length(covs), function (y) paste0("control", y))]
-        
-        if(use.diagonal.covmat == TRUE) {
-          cov.matrix <- diag(apply(cov.data, 2, var), ncol(cov.data), ncol(cov.data))
-        }
-        if (use.diagonal.covmat == FALSE) {
-          cov.matrix <- cov(cov.data)
-        }
-        
-        set$maha <- tryCatch({
-          mahalanobis(x = as.matrix(cov.data), center = as.matrix(center.data), cov = as.matrix(cov.matrix))
-        }, warning = function(w) {
+        # For each of the new Maha sets, calculate mahalanobis distance for each observation compared to the treated observation from original matched set, then take average for each unit
+          center.data <- expandedset[expandedset$unit == 999999999,][, sapply(1:length(covs), function (y) paste0("control", y))]
+          expandedset <- expandedset[expandedset$unit != 999999999,]
+          cov.data <- expandedset[, sapply(1:length(covs), function (y) paste0("control", y))]
           
-        }, error = function(e) {
-          cov.matrix <- cov(cov.data)
-          mahalanobis(x = as.matrix(cov.data), center = as.matrix(center.data), cov = as.matrix(cov.matrix), inverted = TRUE)
-        })
-        set %>% group_by(unit) %>% summarise(maha = mean(maha)) -> set
-        return(set)
+          if(use_diagonal_covmat == TRUE) {
+            cov.matrix <- diag(apply(cov.data, 2, var), ncol(cov.data), ncol(cov.data))
+          }
+          if (use_diagonal_covmat == FALSE) {
+            cov.matrix <- cov(cov.data)
+          }
+          
+          expandedset$maha <- tryCatch({
+            mahalanobis(x = as.matrix(cov.data), center = as.matrix(center.data), cov = as.matrix(cov.matrix))
+          }, warning = function(w) {
+            
+          }, error = function(e) {
+            cov.matrix <- cov(cov.data)
+            mahalanobis(x = as.matrix(cov.data), center = as.matrix(center.data), cov = as.matrix(cov.matrix), inverted = TRUE)
+          })
+          expandedset %>% group_by(unit) %>% summarise(maha = mean(maha)) -> mahaset # Take mean of mahalanobis distances for each unit
+                                           
+        # Use mahalanobis distances and limit set to size_match 
+          set <- merge(set, mahaset, by = 'unit', all = TRUE)
+          treated_maha <- set[set$treatment == 1,]
+          control_maha <- set[set$treatment == 0,]
+          control_maha <- arrange(control_maha, maha)[1:size_match,]
+          control_maha$weight <- (1/size_match)
+          set <- rbind(treated_maha, control_maha)
+          set$maha <- NULL
+          return(set)
       }
-    }
-    
-    maha_sets_distance <- lapply(maha_sets, maha_calculations)
-    
-    # Merge to add mean maha distance to original sets
-    listofdfs <- names(maha_sets_distance)
-    for (i in 1:length(listofdfs)) {
-      x <- maha_sets_distance[[listofdfs[[i]]]]
-      y <- sets[[listofdfs[[i]]]]
-      sets[[listofdfs[[i]]]] <- merge(x,y, by = 'unit', all = TRUE)
-    }
-    
-    # Restrict size of each matched set to size_match
-    restrict_sets_maha <- function(set, size.match = size_match) {
-      treated_maha <- set[set$treatment == 1,]
-      control_maha <- set[set$treatment == 0,]
-      control_maha <- arrange(control_maha, maha)[1:size.match,]
-      control_maha$weight <- (1/size.match)
-      set <- rbind(treated_maha, control_maha)
-      set$maha <- NULL
       return(set)
     }
     
-    for (i in 1:length(listofdfs)) {
-      sets[[listofdfs[[i]]]] <- restrict_sets_maha(sets[[listofdfs[[i]]]])
-    }
-    
+    sets <- lapply(sets, build_maha_sets)
+
     output <- bind_rows(sets)
   }
   
