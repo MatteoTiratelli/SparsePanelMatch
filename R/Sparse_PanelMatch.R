@@ -15,7 +15,7 @@
 #' @param time_window_in_months Integer representing the size of the time window in months within which to search for control observations.
 #' @param match_missing Whether or not to match missing values within treatment history (defaults to TRUE).
 #' @param covs List of covariates to use in matching refinement procedures (should be a list of strings of characters).
-#' @param qoi The wuantity of interest: either 'ATT' (Average Treatment effect on Treated) or 'ATC' (Average Treatment effect on Controls).
+#' @param qoi The quantity of interest: either 'ATT' (Average Treatment effect on Treated) or 'ATC' (Average Treatment effect on Controls).
 #' @param refinement_method The refinement method used to improve covariate balancing after the exact matching procedure. Can take one of: "none"; "CBPS.weight" (adjusts weights by Covariate Balancing Propensity Scores); "CBPS.match" (reduces the size of each control set to size_match by lowest CBPS); "ps.weight" and "ps.match" do the same for standard propensity scores; "mahalanobis" reduces set size to size_match by Mahalanobis distance. For more details see Imai, Kim & Wang (2018).
 #' @param size_match Integer representing the maximum number of control observations within each refined set. For use with 'CBPS.match', 'ps.match' and 'mahalanobis'. Has no impact otherwise.
 #' @param use_diagonal_covmat Whether or not mahalanobis distance calculation should use a regular covariance matrix (FALSE), or a diagonal matrix with only covariate variances (TRUE). Imai, Kim & Wang (2018) report that, "in many cases, setting this to TRUE can lead to better covariate balance, especially when there is high correlation between variables". Default is FALSE.
