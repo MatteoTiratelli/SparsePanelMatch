@@ -41,9 +41,9 @@ Sparse_PanelMatch(
 
 \item{match_missing}{Whether or not to match missing values within treatment history (defaults to TRUE).}
 
-\item{covs}{List of covariates to use in matching refinement procedures (should be a list of strings of characters).}
+\item{covs}{List of covariates to use in matching refinement procedures (should be a list of strings e.g. c('control_1', 'control_2')).}
 
-\item{qoi}{The wuantity of interest: either 'ATT' (Average Treatment effect on Treated) or 'ATC' (Average Treatment effect on Controls).}
+\item{qoi}{The quantity of interest: either 'ATT' (Average Treatment effect on Treated) or 'ATC' (Average Treatment effect on Controls).}
 
 \item{refinement_method}{The refinement method used to improve covariate balancing after the exact matching procedure. Can take one of: "none"; "CBPS.weight" (adjusts weights by Covariate Balancing Propensity Scores); "CBPS.match" (reduces the size of each control set to size_match by lowest CBPS); "ps.weight" and "ps.match" do the same for standard propensity scores; "mahalanobis" reduces set size to size_match by Mahalanobis distance. For more details see Imai, Kim & Wang (2018).}
 
