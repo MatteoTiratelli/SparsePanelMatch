@@ -94,7 +94,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     if(qoi == "atc"){ # For each treated unit, find the dates when Treatment = 0, but was 1 at previous observation
       listofdates <- df1$time[df1$unit == z & df1$treatment == 0 & df1$lag_treatment_1 == 1]
     }
-    lapply(listofdates, .find_controls, y = z) # Find matching controls
+    lapply(listofdates, .find_controls, y = z, df1 = df1, time_window_in_months = time_window_in_months) # Find matching controls
   }
   
   sets <- lapply(units, find_exact_matches)
@@ -119,7 +119,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
                   family = binomial(link = "logit"), data = output)
     }
     sets <- split(output, f = output$group)
-    sets_with_ps <- lapply(sets, .inverse_PS_weighting, B = fit0$coefficients)
+    sets_with_ps <- lapply(sets, .inverse_PS_weighting, B = fit0$coefficients, covs = covs)
     
     # Adjust weights, or match by size_match
     if(refinement_method == "CBPS.weight" | refinement_method == "ps.weight") {
@@ -136,7 +136,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
     output %>% drop_na(all_of(controlslist)) -> output
     sets <- split(output, f = output$group)    
-    sets <- lapply(sets, .build_maha_sets)
+    sets <- lapply(sets, .build_maha_sets, covs = covs, size_match = size_match, use_diagonal_covmat = use_diagonal_covmat)
     output <- bind_rows(sets)
   }
   
@@ -164,7 +164,7 @@ summary.SparsePanelMatch <- function(object) {
 }
                                            
 
-.find_controls <- function (x, y) {
+.find_controls <- function (x, y, df1, time_window_in_months) {
   # create list of treatment history for given treated observation
   list1 <- as.vector(df1[, lagindex][df1$unit == y & df1$time == x,])
 
@@ -193,9 +193,9 @@ summary.SparsePanelMatch <- function(object) {
 }                             
 
 
-.inverse_PS_weighting <- function (x, B) { # Calculate initial inverse propensity score weights (Hirano et al. 2003) [same method for CBPS]
+.inverse_PS_weighting <- function (x, B, covs) { # Calculate initial inverse propensity score weights (Hirano et al. 2003) [same method for CBPS]
   xx <- cbind(1, as.matrix(x[, sapply(1:length(covs), function (y) paste0("control", y))]))
-  x[, (ncol(x) + 1)] <- as.vector(1 - 1/(1+exp(xx %*% fit0$coefficients)))
+  x[, (ncol(x) + 1)] <- as.vector(1 - 1/(1+exp(xx %*% B)))
   names(x)[ncol(x)] <- "ps"
   return(x)
 }
@@ -230,7 +230,7 @@ summary.SparsePanelMatch <- function(object) {
 
 
 # For each matched set, use unit ids to find all other observations of those units
-.build_maha_sets <- function(set){
+.build_maha_sets <- function(set, covs, size_match, use_diagonal_covmat){
   if((nrow(set)-1) > size_match){
     listofunits <- unique(set$unit[set$treatment == 0])
     expandedset <- df1[df1$unit %in% listofunits,]
