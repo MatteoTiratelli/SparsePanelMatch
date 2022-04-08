@@ -136,7 +136,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
     output %>% drop_na(all_of(controlslist)) -> output
     sets <- split(output, f = output$group)    
-    sets <- lapply(sets, .build_maha_sets, covs = covs, size_match = size_match, use_diagonal_covmat = use_diagonal_covmat)
+    sets <- lapply(sets, .build_maha_sets, covs = covs, size_match = size_match, use_diagonal_covmat = use_diagonal_covmat, df1 = df1)
     output <- bind_rows(sets)
   }
   
@@ -230,7 +230,7 @@ summary.SparsePanelMatch <- function(object) {
 
 
 # For each matched set, use unit ids to find all other observations of those units
-.build_maha_sets <- function(set, covs, size_match, use_diagonal_covmat){
+.build_maha_sets <- function(set, covs, size_match, use_diagonal_covmat, df1){
   if((nrow(set)-1) > size_match){
     listofunits <- unique(set$unit[set$treatment == 0])
     expandedset <- df1[df1$unit %in% listofunits,]
