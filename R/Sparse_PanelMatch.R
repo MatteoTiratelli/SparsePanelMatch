@@ -94,7 +94,7 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
     if(qoi == "atc"){ # For each treated unit, find the dates when Treatment = 0, but was 1 at previous observation
       listofdates <- df1$time[df1$unit == z & df1$treatment == 0 & df1$lag_treatment_1 == 1]
     }
-    lapply(listofdates, .find_controls, y = z, df1 = df1, time_window_in_months = time_window_in_months) # Find matching controls
+    lapply(listofdates, .find_controls, y = z, df1 = df1, time_window_in_months = time_window_in_months, lagindex = lagindex) # Find matching controls
   }
   
   sets <- lapply(units, find_exact_matches)
@@ -164,7 +164,7 @@ summary.SparsePanelMatch <- function(object) {
 }
                                            
 
-.find_controls <- function (x, y, df1, time_window_in_months) {
+.find_controls <- function (x, y, df1, time_window_in_months, lagindex) {
   # create list of treatment history for given treated observation
   list1 <- as.vector(df1[, lagindex][df1$unit == y & df1$time == x,])
 
