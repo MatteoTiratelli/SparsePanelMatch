@@ -263,7 +263,7 @@ summary.SparsePanelMatch <- function(object) {
     set <- merge(set, mahaset, by = 'unit', all = TRUE)
     treated_maha <- set[set$treatment == 1,]
     control_maha <- set[set$treatment == 0,]
-    ontrol_maha <- arrange(control_maha, maha)[1:size_match,]
+    control_maha <- arrange(control_maha, maha)[1:size_match,]
     control_maha$weight <- (1/size_match)
     set <- rbind(treated_maha, control_maha)
     set$maha <- NULL
