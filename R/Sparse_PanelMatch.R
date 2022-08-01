@@ -208,7 +208,7 @@ summary.SparsePanelMatch <- function(object) {
     set$weight <- c(1,1)}
     vec.ratio <- control.ps.set$ps / (1 - control.ps.set$ps)
     if(sum(vec.ratio) == 0) {
-      set$weight <- rep(1 / nrow(control.ps.set), nrow(control.ps.set))
+      set$weight <- c(rep(1 / nrow(control.ps.set), nrow(control.ps.set)), 1)
     }
     if(sum(vec.ratio) > 0 & nrow(control.ps.set) > 1) {
       set$weight <- c((vec.ratio)/sum(vec.ratio), 1)
