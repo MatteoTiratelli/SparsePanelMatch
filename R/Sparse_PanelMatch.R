@@ -107,12 +107,8 @@ Sparse_PanelMatch <- function(data, time, unit, treatment, outcome,
   if(refinement_method %in% c("CBPS.weight", "CBPS.match", "ps.weight", "ps.match")) {
     
     controlslist <- sapply(1:length(covs), function (x) paste0("control", x))                                 
-    output %>% drop_na(all_of(controlslist)) -> output
-    output %>%
-      group_by(group) %>%
-      mutate(grouptotal = sum(treatment)) %>%
-      filter(grouptotal > 0) %>%
-      select(!grouptotal) -> output
+    output %>% drop_na(all_of(controlslist)) -> output   
+    output <- output[ave(output$treatment, output$group, FUN = sum) == 1,]  # remove any groups where treated unit had NAs for control variable 
     
     # CBPS and PS
     if(refinement_method == "CBPS.weight" | refinement_method == "CBPS.match") {
