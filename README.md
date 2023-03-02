@@ -46,7 +46,7 @@ In the example below, we match observations which (a) occurred within a 5 period
 
 **Refinement:**
 
-3. After this exact matching procedure, the `refinement_method` argument then allows users to further improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distances. These can be used to (a) create weights for each control observation (`ps.weight`, `CBPS.weight`), or (b) to limit the size of the set of control observations (`mahalanobis`, `ps.match`, `CBPS.match` - all must be used with `size_match`). For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
+3. After this exact matching procedure, the `refinement_method` argument then allows users to further improve covariate balance by calculating Propensity Scores, Covariate Balancing Propensity Scores and Mahalanobis distances. These can be used to (a) create weights for each control observation (`ps.weight`, `CBPS.weight`), or (b) to limit the size of the set of control observations (`mahalanobis`, `ps.match`, `CBPS.match` - all must be used with `size_match`). Covariates are specified using `covs`. For details see [Imai, Kim &amp; Wang (2018)](https://imai.fas.harvard.edu/research/tscs.html).
 <p align="center">
   <img width="550" src="https://raw.githubusercontent.com/MatteoTiratelli/matteotiratelli.github.io/master/Files/Screenshot%202022-03-03%20at%2017.48.41.png">
 </p>
@@ -62,7 +62,7 @@ plot(estimates)
 1. The package then allows users to calculate the Average Treatment effect on Treated/Control via a Difference-in-Difference estimator: within each matched set, we compare the difference in the treated unit with the (weighted) mean difference in control units. In pseudo-code: `DiD = (Yt - Yt-1) - mean(Y't - Y't-1)`, where `Yt` is the outcome variable for the treated observation at time `t`, and `Y't` is the outcome variable for a control observation at time `t`.
 2. These can be calculated for n leads of the outcome variable (specified via `outcome_leads`), allowing users to observe the long run impact of the treatment. In that case, for each lead `L`, we calculate the difference between the outcome at time `t+L` and the outcome at `t-1` for all treated and control observations.
 3. The final estimand is the mean of the Difference-in-Difference scores across all matched sets. A separate estimand is computed for each lead.
-4. Standard errors are then calculated by block bootstrapping (resampling across units), and the package allows users to generate both percentile and bias-corrected confidence intervals.
+4. Standard errors are then calculated by block bootstrapping (resampling across units), and the package allows users to generate both standard percentile and bias-corrected confidence intervals.
 <p align="center">
   <img width="550" src="https://github.com/MatteoTiratelli/matteotiratelli.github.io/raw/master/Files/plot_zoom_png.png">
 </p>
